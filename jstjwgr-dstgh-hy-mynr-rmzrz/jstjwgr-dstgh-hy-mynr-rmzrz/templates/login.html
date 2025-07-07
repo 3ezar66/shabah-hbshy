@@ -1,0 +1,60 @@
+
+{% extends "base.html" %}
+
+{% block title %}ورود - سیستم شناسایی ماینر{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                        <h3>سیستم شناسایی ماینر</h3>
+                        <p class="text-muted">وارد حساب کاربری خود شوید</p>
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">نام کاربری</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">رمز عبور</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 mb-3">
+                            <i class="fas fa-sign-in-alt"></i> ورود
+                        </button>
+                        
+                        <div class="text-center">
+                            <a href="{{ url_for('register') }}" class="text-decoration-none">
+                                حساب کاربری ندارید؟ ثبت نام کنید
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6 class="card-title">حساب آزمایشی</h6>
+                    <p class="card-text small text-muted">
+                        نام کاربری: <strong>admin</strong><br>
+                        رمز عبور: <strong>admin123</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

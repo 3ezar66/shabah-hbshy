@@ -1,0 +1,176 @@
+
+{% extends "base.html" %}
+
+{% block title %}داشبورد - سیستم شناسایی ماینر{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-tachometer-alt"></i> داشبورد</h1>
+    <p class="text-muted">نمای کلی از وضعیت سیستم و ماینرهای شناسایی شده</p>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3>{{ total_miners }}</h3>
+                    <p class="mb-0">کل ماینرهای یافت شده</p>
+                </div>
+                <i class="fas fa-microchip fa-2x"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3>{{ active_miners }}</h3>
+                    <p class="mb-0">ماینرهای فعال</p>
+                </div>
+                <i class="fas fa-power-off fa-2x"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 id="cpu-usage">0%</h3>
+                    <p class="mb-0">مصرف CPU</p>
+                </div>
+                <i class="fas fa-chart-line fa-2x"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 id="memory-usage">0%</h3>
+                    <p class="mb-0">مصرف حافظه</p>
+                </div>
+                <i class="fas fa-memory fa-2x"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-exclamation-triangle"></i> سطح تهدیدات</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="threatChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-clock"></i> اسکن‌های اخیر</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_scans %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>نوع اسکن</th>
+                                    <th>هدف</th>
+                                    <th>وضعیت</th>
+                                    <th>تاریخ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for scan in recent_scans %}
+                                <tr>
+                                    <td>{{ scan.scan_type }}</td>
+                                    <td>{{ scan.target_range }}</td>
+                                    <td>
+                                        {% if scan.status == 'completed' %}
+                                            <span class="badge bg-success">تکمیل شده</span>
+                                        {% elif scan.status == 'running' %}
+                                            <span class="badge bg-warning">در حال اجرا</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">خطا</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ scan.start_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">هیچ اسکن اخیری وجود ندارد</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-map"></i> نقشه ماینرهای شناسایی شده</h5>
+            </div>
+            <div class="card-body">
+                <div id="minersMap" style="height: 400px; background: #f8f9fa; border-radius: 10px;">
+                    <div class="d-flex justify-content-center align-items-center h-100">
+                        <div class="text-center">
+                            <i class="fas fa-map fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">نقشه تعاملی ماینرهای شناسایی شده</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // نمودار سطح تهدیدات
+    const threatCtx = document.getElementById('threatChart').getContext('2d');
+    const threatChart = new Chart(threatCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['بحرانی', 'بالا', 'متوسط', 'پایین'],
+            datasets: [{
+                data: [
+                    {% for threat in threat_stats %}
+                        {% if threat.threat_level == 'critical' %}{{ threat.count }}{% else %}0{% endif %},
+                    {% endfor %}
+                    {% for threat in threat_stats %}
+                        {% if threat.threat_level == 'high' %}{{ threat.count }}{% else %}0{% endif %},
+                    {% endfor %}
+                    {% for threat in threat_stats %}
+                        {% if threat.threat_level == 'medium' %}{{ threat.count }}{% else %}0{% endif %},
+                    {% endfor %}
+                    {% for threat in threat_stats %}
+                        {% if threat.threat_level == 'low' %}{{ threat.count }}{% else %}0{% endif %},
+                    {% endfor %}
+                ],
+                backgroundColor: ['#dc3545', '#fd7e14', '#ffc107', '#28a745']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // بروزرسانی خودکار معیارها
+    updateSystemMetrics();
+</script>
+{% endblock %}

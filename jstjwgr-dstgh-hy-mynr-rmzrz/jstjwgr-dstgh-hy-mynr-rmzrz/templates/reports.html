@@ -1,0 +1,303 @@
+
+{% extends "base.html" %}
+
+{% block title %}گزارشات - سیستم شناسایی ماینر{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-chart-bar"></i> گزارشات و آمار</h1>
+    <p class="text-muted">تحلیل جامع از ماینرهای شناسایی شده</p>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3>{{ total_miners }}</h3>
+                    <p class="mb-0">کل ماینرها</p>
+                </div>
+                <i class="fas fa-microchip fa-2x"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3>{{ threat_stats|length }}</h3>
+                    <p class="mb-0">انواع تهدید</p>
+                </div>
+                <i class="fas fa-shield-alt fa-2x"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3>{{ daily_stats|length }}</h3>
+                    <p class="mb-0">روزهای فعال</p>
+                </div>
+                <i class="fas fa-calendar fa-2x"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3>{{ port_stats|length }}</h3>
+                    <p class="mb-0">پورت‌های شناسایی شده</p>
+                </div>
+                <i class="fas fa-network-wired fa-2x"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-exclamation-triangle"></i> توزیع سطح تهدید</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="threatChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> آمار روزانه</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="dailyChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-network-wired"></i> پرکاربردترین پورت‌ها</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="portChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-table"></i> جدول خلاصه</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>متریک</th>
+                                <th>مقدار</th>
+                                <th>درصد</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for threat in threat_stats %}
+                            <tr>
+                                <td>
+                                    {% if threat.threat_level == 'critical' %}
+                                        <span class="badge bg-danger">بحرانی</span>
+                                    {% elif threat.threat_level == 'high' %}
+                                        <span class="badge bg-warning">بالا</span>
+                                    {% elif threat.threat_level == 'medium' %}
+                                        <span class="badge bg-info">متوسط</span>
+                                    {% else %}
+                                        <span class="badge bg-success">پایین</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ threat.count }}</td>
+                                <td>{{ ((threat.count / total_miners) * 100)|round(1) if total_miners > 0 else 0 }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-download"></i> دانلود گزارشات</h5>
+                <div>
+                    <button class="btn btn-outline-primary btn-sm" onclick="exportPDF()">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="exportExcel()">
+                        <i class="fas fa-file-excel"></i> Excel
+                    </button>
+                    <button class="btn btn-outline-info btn-sm" onclick="exportJSON()">
+                        <i class="fas fa-file-code"></i> JSON
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">گزارشات کامل را در فرمت‌های مختلف دانلود کنید</p>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <i class="fas fa-file-pdf fa-2x text-danger mb-2"></i>
+                                <h6>گزارش PDF</h6>
+                                <p class="small text-muted">گزارش کامل با نمودارها</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <i class="fas fa-file-excel fa-2x text-success mb-2"></i>
+                                <h6>جدول Excel</h6>
+                                <p class="small text-muted">داده‌های خام برای تحلیل</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <i class="fas fa-file-code fa-2x text-info mb-2"></i>
+                                <h6>فایل JSON</h6>
+                                <p class="small text-muted">داده‌های ساختاریافته</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // نمودار سطح تهدید
+    const threatCtx = document.getElementById('threatChart').getContext('2d');
+    new Chart(threatCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['بحرانی', 'بالا', 'متوسط', 'پایین'],
+            datasets: [{
+                data: [
+                    {% for threat in threat_stats %}
+                        {% if threat.threat_level == 'critical' %}{{ threat.count }},{% endif %}
+                    {% endfor %}
+                    {% for threat in threat_stats %}
+                        {% if threat.threat_level == 'high' %}{{ threat.count }},{% endif %}
+                    {% endfor %}
+                    {% for threat in threat_stats %}
+                        {% if threat.threat_level == 'medium' %}{{ threat.count }},{% endif %}
+                    {% endfor %}
+                    {% for threat in threat_stats %}
+                        {% if threat.threat_level == 'low' %}{{ threat.count }},{% endif %}
+                    {% endfor %}
+                ],
+                backgroundColor: ['#dc3545', '#fd7e14', '#ffc107', '#28a745']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    // نمودار روزانه
+    const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+    new Chart(dailyCtx, {
+        type: 'line',
+        data: {
+            labels: [
+                {% for stat in daily_stats %}
+                    '{{ stat.date }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'تعداد ماینرهای شناسایی شده',
+                data: [
+                    {% for stat in daily_stats %}
+                        {{ stat.count }},
+                    {% endfor %}
+                ],
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // نمودار پورت‌ها
+    const portCtx = document.getElementById('portChart').getContext('2d');
+    new Chart(portCtx, {
+        type: 'bar',
+        data: {
+            labels: [
+                {% for port, count in port_stats.items() %}
+                    '{{ port }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'تعداد استفاده',
+                data: [
+                    {% for port, count in port_stats.items() %}
+                        {{ count }},
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(54, 162, 235, 0.8)'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // توابع دانلود
+    function exportPDF() {
+        showAlert('در حال تولید گزارش PDF...', 'info');
+        // پیاده‌سازی دانلود PDF
+    }
+    
+    function exportExcel() {
+        showAlert('در حال تولید فایل Excel...', 'info');
+        // پیاده‌سازی دانلود Excel
+    }
+    
+    function exportJSON() {
+        showAlert('در حال تولید فایل JSON...', 'info');
+        // پیاده‌سازی دانلود JSON
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,185 @@
+
+{% extends "base.html" %}
+
+{% block title %}ماینرهای یافت شده - سیستم شناسایی ماینر{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-microchip"></i> ماینرهای یافت شده</h1>
+    <p class="text-muted">فهرست کامل ماینرهای شناسایی شده در سیستم</p>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-8">
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" class="form-control" id="searchInput" placeholder="جستجو بر اساس IP، نام میزبان یا مکان...">
+        </div>
+    </div>
+    <div class="col-md-4">
+        <select class="form-select" id="threatFilter">
+            <option value="">همه سطوح تهدید</option>
+            <option value="critical">بحرانی</option>
+            <option value="high">بالا</option>
+            <option value="medium">متوسط</option>
+            <option value="low">پایین</option>
+        </select>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if miners.items %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>IP آدرس</th>
+                            <th>نام میزبان</th>
+                            <th>مکان</th>
+                            <th>نوع دستگاه</th>
+                            <th>سطح تهدید</th>
+                            <th>امتیاز اطمینان</th>
+                            <th>تاریخ تشخیص</th>
+                            <th>وضعیت</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for miner in miners.items %}
+                        <tr class="threat-{{ miner.threat_level }}">
+                            <td>
+                                <strong>{{ miner.ip_address }}</strong>
+                                {% if miner.mac_address %}
+                                    <br><small class="text-muted">{{ miner.mac_address }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ miner.hostname or 'نامشخص' }}</td>
+                            <td>
+                                {% if miner.location %}
+                                    {{ miner.location }}
+                                    {% if miner.latitude and miner.longitude %}
+                                        <br><small class="text-muted">{{ "%.4f"|format(miner.latitude) }}, {{ "%.4f"|format(miner.longitude) }}</small>
+                                    {% endif %}
+                                {% else %}
+                                    نامشخص
+                                {% endif %}
+                            </td>
+                            <td>{{ miner.device_type }}</td>
+                            <td>
+                                {% if miner.threat_level == 'critical' %}
+                                    <span class="badge bg-danger">بحرانی</span>
+                                {% elif miner.threat_level == 'high' %}
+                                    <span class="badge bg-warning">بالا</span>
+                                {% elif miner.threat_level == 'medium' %}
+                                    <span class="badge bg-info">متوسط</span>
+                                {% else %}
+                                    <span class="badge bg-success">پایین</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar" role="progressbar" 
+                                         style="width: {{ miner.confidence_score }}%"
+                                         aria-valuenow="{{ miner.confidence_score }}" 
+                                         aria-valuemin="0" aria-valuemax="100">
+                                        {{ miner.confidence_score }}%
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ miner.detection_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                {% if miner.is_active %}
+                                    <span class="badge bg-success">فعال</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">غیرفعال</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('miner_detail', miner_id=miner.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> جزئیات
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- صفحه‌بندی -->
+            <nav aria-label="صفحه‌بندی">
+                <ul class="pagination justify-content-center">
+                    {% if miners.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('miners', page=miners.prev_num) }}">قبلی</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in miners.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != miners.page %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('miners', page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if miners.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('miners', page=miners.next_num) }}">بعدی</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-microchip fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">هیچ ماینری یافت نشد</h5>
+                <p class="text-muted">برای شناسایی ماینرهای رمزارز، اسکن جدید انجام دهید</p>
+                <a href="{{ url_for('scan') }}" class="btn btn-primary">
+                    <i class="fas fa-search"></i> شروع اسکن
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // فیلتر جستجو
+    document.getElementById('searchInput').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+    
+    // فیلتر سطح تهدید
+    document.getElementById('threatFilter').addEventListener('change', function() {
+        const threatLevel = this.value;
+        const rows = document.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+            if (threatLevel === '' || row.classList.contains('threat-' + threatLevel)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

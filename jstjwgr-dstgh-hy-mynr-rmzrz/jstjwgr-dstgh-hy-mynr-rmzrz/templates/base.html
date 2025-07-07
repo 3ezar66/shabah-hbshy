@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}سیستم شناسایی ماینرهای رمزارز{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Vazir:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Vazir', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 30px;
+            font-weight: 500;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #764ba2, #667eea);
+            transform: translateY(-2px);
+        }
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            min-height: 100vh;
+            backdrop-filter: blur(10px);
+        }
+        .sidebar .nav-link {
+            color: #333;
+            font-weight: 500;
+            margin: 5px 0;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+        .sidebar .nav-link.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+        .threat-critical { border-right: 5px solid #dc3545; }
+        .threat-high { border-right: 5px solid #fd7e14; }
+        .threat-medium { border-right: 5px solid #ffc107; }
+        .threat-low { border-right: 5px solid #28a745; }
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        .table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .page-header {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    {% if session.user_id %}
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-shield-alt"></i> سیستم شناسایی ماینر
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">
+                    <i class="fas fa-user"></i> {{ session.username }}
+                </span>
+                <a class="nav-link" href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt"></i> خروج
+                </a>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <div class="container-fluid">
+        <div class="row">
+            {% if session.user_id %}
+            <div class="col-md-2 sidebar p-3">
+                <nav class="nav flex-column">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'index' }}" href="{{ url_for('index') }}">
+                        <i class="fas fa-tachometer-alt"></i> داشبورد
+                    </a>
+                    <a class="nav-link {{ 'active' if request.endpoint == 'scan' }}" href="{{ url_for('scan') }}">
+                        <i class="fas fa-search"></i> اسکن جدید
+                    </a>
+                    <a class="nav-link {{ 'active' if request.endpoint == 'miners' }}" href="{{ url_for('miners') }}">
+                        <i class="fas fa-microchip"></i> ماینرهای یافت شده
+                    </a>
+                    <a class="nav-link {{ 'active' if request.endpoint == 'reports' }}" href="{{ url_for('reports') }}">
+                        <i class="fas fa-chart-bar"></i> گزارشات
+                    </a>
+                    <a class="nav-link" href="#" id="liveMonitor">
+                        <i class="fas fa-eye"></i> نظارت زنده
+                    </a>
+                </nav>
+            </div>
+            <div class="col-md-10 p-3">
+            {% else %}
+            <div class="col-12">
+            {% endif %}
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // نظارت زنده
+        document.getElementById('liveMonitor')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            startLiveMonitoring();
+        });
+
+        function startLiveMonitoring() {
+            const interval = setInterval(function() {
+                fetch('/api/live_monitor')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.suspicious_processes.length > 0) {
+                            showAlert('فرآیند مشکوک شناسایی شد!', 'warning');
+                        }
+                        if (data.network_connections.length > 0) {
+                            showAlert('اتصال شبکه مشکوک شناسایی شد!', 'danger');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }, 5000);
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.prepend(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // بروزرسانی معیارهای سیستم
+        function updateSystemMetrics() {
+            fetch('/api/system_metrics')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('cpu-usage').textContent = data.cpu_usage.toFixed(1) + '%';
+                    document.getElementById('memory-usage').textContent = data.memory_usage.toFixed(1) + '%';
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // بروزرسانی هر 10 ثانیه
+        setInterval(updateSystemMetrics, 10000);
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
