@@ -26,7 +26,7 @@ from concurrent.futures import ThreadPoolExecutor
 import uuid
 import secrets
 
-# تنظیمات لاگ
+# ��نظیمات لاگ
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -670,6 +670,85 @@ with app.app_context():
 def about():
     ensure_logged_in()
     return render_template('about.html')
+
+@app.route('/scan_history')
+def scan_history():
+    ensure_logged_in()
+    return render_template('scan_history.html')
+
+@app.route('/api/scan_sessions')
+def api_scan_sessions():
+    ensure_logged_in()
+    sessions = ScanSession.query.filter_by(user_id=session['user_id']).order_by(ScanSession.start_time.desc()).all()
+
+    sessions_data = []
+    for s in sessions:
+        sessions_data.append({
+            'id': s.session_id,
+            'scan_type': s.scan_type,
+            'target_range': s.target_range,
+            'status': s.status,
+            'progress': s.progress,
+            'detected_miners': s.detected_miners,
+            'start_time': s.start_time.strftime('%Y-%m-%d %H:%M:%S') if s.start_time else '',
+            'end_time': s.end_time.strftime('%Y-%m-%d %H:%M:%S') if s.end_time else '',
+            'total_hosts': s.total_hosts,
+            'scanned_hosts': s.scanned_hosts
+        })
+
+    return jsonify(sessions_data)
+
+@app.route('/api/pause_scan/<session_id>', methods=['POST'])
+def api_pause_scan(session_id):
+    ensure_logged_in()
+    scan_session = ScanSession.query.filter_by(session_id=session_id, user_id=session['user_id']).first()
+    if scan_session:
+        scan_session.status = 'paused'
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'اسکن متوقف شد'})
+    return jsonify({'success': False, 'message': 'اسکن یافت نشد'})
+
+@app.route('/api/retry_scan/<session_id>', methods=['POST'])
+def api_retry_scan(session_id):
+    ensure_logged_in()
+    scan_session = ScanSession.query.filter_by(session_id=session_id, user_id=session['user_id']).first()
+    if scan_session:
+        scan_session.status = 'running'
+        scan_session.progress = 0
+        scan_session.start_time = datetime.utcnow()
+        db.session.commit()
+
+        # Restart scan in background
+        threading.Thread(target=run_scan, args=(session_id,)).start()
+
+        return jsonify({'success': True, 'message': 'اسکن مجدد شروع شد'})
+    return jsonify({'success': False, 'message': 'اسکن یافت نشد'})
+
+@app.route('/api/download_report/<session_id>')
+def api_download_report(session_id):
+    ensure_logged_in()
+    scan_session = ScanSession.query.filter_by(session_id=session_id, user_id=session['user_id']).first()
+    if scan_session:
+        # Generate report content
+        report_content = f"""
+گزارش اسکن {session_id}
+===================
+نوع اسکن: {scan_session.scan_type}
+محدوده: {scan_session.target_range}
+وضعیت: {scan_session.status}
+زمان شروع: {scan_session.start_time}
+زمان پایان: {scan_session.end_time}
+ماینرهای یافت شده: {scan_session.detected_miners}
+میزبان‌های اسکن شده: {scan_session.scanned_hosts}
+        """
+
+        from flask import make_response
+        response = make_response(report_content)
+        response.headers['Content-Disposition'] = f'attachment; filename=scan_report_{session_id}.txt'
+        response.headers['Content-Type'] = 'text/plain; charset=utf-8'
+        return response
+
+    return jsonify({'error': 'گزارش یافت نشد'}), 404
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
