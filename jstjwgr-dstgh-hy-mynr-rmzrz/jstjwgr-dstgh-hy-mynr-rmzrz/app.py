@@ -230,7 +230,7 @@ class MinerDetectionEngine:
         return open_ports
 
     def analyze_network_traffic(self, ip):
-        """تحلیل ترافیک شبکه"""
+        """تحلیل تراف��ک شبکه"""
         try:
             connections = psutil.net_connections()
             suspicious_connections = []
@@ -588,8 +588,7 @@ def reports():
 
 @app.route('/api/system_metrics')
 def system_metrics():
-    if 'user_id' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
+    ensure_logged_in()
     
     # جمع‌آوری معیارهای سیستم
     cpu_usage = psutil.cpu_percent()
