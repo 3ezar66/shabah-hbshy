@@ -197,82 +197,93 @@
       let liveMonitoringActive = false;
 
       // نظارت زنده
-      document.getElementById('liveMonitor')?.addEventListener('click', function(e) {
+      document
+        .getElementById("liveMonitor")
+        ?.addEventListener("click", function (e) {
           e.preventDefault();
           startLiveMonitoring();
-      });
+        });
 
       function startLiveMonitoring() {
-          if (liveMonitoringActive) return;
-          liveMonitoringActive = true;
+        if (liveMonitoringActive) return;
+        liveMonitoringActive = true;
 
-          const interval = setInterval(function() {
-              if (!liveMonitoringActive) {
-                  clearInterval(interval);
-                  return;
+        const interval = setInterval(function () {
+          if (!liveMonitoringActive) {
+            clearInterval(interval);
+            return;
+          }
+
+          fetch("/api/live_monitor")
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(
+                  `HTTP ${response.status}: ${response.statusText}`,
+                );
               }
-
-              fetch('/api/live_monitor')
-                  .then(response => {
-                      if (!response.ok) {
-                          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                      }
-                      return response.json();
-                  })
-                  .then(data => {
-                      if (data.suspicious_processes && data.suspicious_processes.length > 0) {
-                          showAlert('فرآیند مشکوک شناسایی شد!', 'warning');
-                      }
-                      if (data.network_connections && data.network_connections.length > 0) {
-                          showAlert('اتصال شبکه مشکوک ش��اسایی شد!', 'danger');
-                      }
-                  })
-                  .catch(error => {
-                      console.error('Live monitoring error:', error);
-                      // Don't clear interval on temporary errors
-                  });
-          }, 5000);
+              return response.json();
+            })
+            .then((data) => {
+              if (
+                data.suspicious_processes &&
+                data.suspicious_processes.length > 0
+              ) {
+                showAlert("فرآیند مشکوک شناسایی شد!", "warning");
+              }
+              if (
+                data.network_connections &&
+                data.network_connections.length > 0
+              ) {
+                showAlert("اتصال شبکه مشکوک ش��اسایی شد!", "danger");
+              }
+            })
+            .catch((error) => {
+              console.error("Live monitoring error:", error);
+              // Don't clear interval on temporary errors
+            });
+        }, 5000);
       }
 
       function showAlert(message, type) {
-          const alertDiv = document.createElement('div');
-          alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-          alertDiv.innerHTML = `
-              ${message}
-              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          `;
-          document.body.prepend(alertDiv);
+        const alertDiv = document.createElement("div");
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+        document.body.prepend(alertDiv);
 
-          setTimeout(() => {
-              alertDiv.remove();
-          }, 5000);
+        setTimeout(() => {
+          alertDiv.remove();
+        }, 5000);
       }
 
       // بروزرسانی معیارهای سیستم
       function updateSystemMetrics() {
-          fetch('/api/system_metrics')
-              .then(response => {
-                  if (!response.ok) {
-                      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                  }
-                  return response.json();
-              })
-              .then(data => {
-                  const cpuElement = document.getElementById('cpu-usage');
-                  const memoryElement = document.getElementById('memory-usage');
-                  if (cpuElement && data.cpu_usage !== undefined) {
-                      cpuElement.textContent = data.cpu_usage.toFixed(1) + '%';
-                  }
-                  if (memoryElement && data.memory_usage !== undefined) {
-                      memoryElement.textContent = data.memory_usage.toFixed(1) + '%';
-                  }
-              })
-              .catch(error => console.error('System metrics error:', error));
+        fetch("/api/system_metrics")
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(
+                `HTTP ${response.status}: ${response.statusText}`,
+              );
+            }
+            return response.json();
+          })
+          .then((data) => {
+            const cpuElement = document.getElementById("cpu-usage");
+            const memoryElement = document.getElementById("memory-usage");
+            if (cpuElement && data.cpu_usage !== undefined) {
+              cpuElement.textContent = data.cpu_usage.toFixed(1) + "%";
+            }
+            if (memoryElement && data.memory_usage !== undefined) {
+              memoryElement.textContent = data.memory_usage.toFixed(1) + "%";
+            }
+          })
+          .catch((error) => console.error("System metrics error:", error));
       }
 
-      // بروزرسانی هر 10 ثانیه - فقط برای کاربران وارد شده
+      // بروزرسانی هر 10 ثانیه
       setInterval(updateSystemMetrics, 10000);
-      {% endif %}
     </script>
     {% block scripts %}{% endblock %}
   </body>
