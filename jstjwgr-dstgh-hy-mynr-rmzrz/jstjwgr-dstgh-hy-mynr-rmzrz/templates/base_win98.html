@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}سیستم شناسایی ماینرهای رمزارز{% endblock %}</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Vazir:wght@300;400;500;600;700&display=swap");
+
+      /* Windows 98 Classic Theme */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Vazir", sans-serif;
+        background: #c0c0c0;
+        color: #000000;
+        font-size: 12px;
+        overflow-x: hidden;
+      }
+
+      /* Classic Window Frame */
+      .window {
+        background: #c0c0c0;
+        border: 2px outset #c0c0c0;
+        margin: 2px;
+      }
+
+      .window-header {
+        background: linear-gradient(to right, #0080ff, #004080);
+        color: white;
+        padding: 2px 4px;
+        font-weight: bold;
+        font-size: 11px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #000080;
+      }
+
+      .window-content {
+        padding: 4px;
+        background: #c0c0c0;
+        min-height: calc(100vh - 80px);
+      }
+
+      /* Classic Menu Bar */
+      .menubar {
+        background: #c0c0c0;
+        border-bottom: 1px solid #808080;
+        border-top: 1px solid #white;
+        display: flex;
+        padding: 2px;
+      }
+
+      .menu-item {
+        padding: 4px 8px;
+        cursor: pointer;
+        font-size: 11px;
+        position: relative;
+      }
+
+      .menu-item:hover {
+        background: #0080ff;
+        color: white;
+      }
+
+      .menu-item.active {
+        background: #0080ff;
+        color: white;
+      }
+
+      /* Dropdown Menu */
+      .dropdown {
+        position: relative;
+        display: inline-block;
+      }
+
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: #c0c0c0;
+        min-width: 160px;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        border: 1px outset #c0c0c0;
+        z-index: 1000;
+      }
+
+      .dropdown:hover .dropdown-content {
+        display: block;
+      }
+
+      .dropdown-item {
+        padding: 4px 8px;
+        display: block;
+        color: #000000;
+        text-decoration: none;
+        font-size: 11px;
+        border-bottom: 1px solid #808080;
+      }
+
+      .dropdown-item:hover {
+        background: #0080ff;
+        color: white;
+      }
+
+      .dropdown-item:last-child {
+        border-bottom: none;
+      }
+
+      /* Classic Toolbar */
+      .toolbar {
+        background: #c0c0c0;
+        border-bottom: 1px solid #808080;
+        padding: 4px;
+        display: flex;
+        gap: 2px;
+        flex-wrap: wrap;
+      }
+
+      .toolbar-button {
+        background: #c0c0c0;
+        border: 1px outset #c0c0c0;
+        padding: 4px 8px;
+        font-size: 11px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        min-width: 60px;
+        justify-content: center;
+      }
+
+      .toolbar-button:hover {
+        border: 1px inset #c0c0c0;
+      }
+
+      .toolbar-button:active {
+        border: 1px inset #c0c0c0;
+        background: #a0a0a0;
+      }
+
+      .toolbar-separator {
+        width: 1px;
+        background: #808080;
+        margin: 2px 4px;
+      }
+
+      /* Status Bar */
+      .statusbar {
+        background: #c0c0c0;
+        border-top: 1px solid #808080;
+        padding: 2px 4px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 11px;
+      }
+
+      .status-panel {
+        border: 1px inset #c0c0c0;
+        padding: 2px 6px;
+        margin: 1px;
+        background: #f0f0f0;
+      }
+
+      /* Classic Buttons */
+      .btn-classic {
+        background: #c0c0c0;
+        border: 1px outset #c0c0c0;
+        padding: 4px 12px;
+        font-size: 11px;
+        cursor: pointer;
+        font-family: "Vazir", sans-serif;
+      }
+
+      .btn-classic:hover {
+        border: 1px inset #c0c0c0;
+      }
+
+      .btn-classic:active {
+        border: 1px inset #c0c0c0;
+        background: #a0a0a0;
+      }
+
+      /* Classic Panels */
+      .panel {
+        background: #c0c0c0;
+        border: 1px inset #c0c0c0;
+        margin: 4px;
+        padding: 8px;
+      }
+
+      .panel-header {
+        font-weight: bold;
+        margin-bottom: 4px;
+        padding-bottom: 2px;
+        border-bottom: 1px solid #808080;
+      }
+
+      /* Classic List View */
+      .listview {
+        background: white;
+        border: 1px inset #c0c0c0;
+        margin: 4px;
+      }
+
+      .listview-header {
+        background: #c0c0c0;
+        border-bottom: 1px solid #808080;
+        padding: 4px;
+        font-weight: bold;
+        font-size: 11px;
+      }
+
+      .listview-item {
+        padding: 2px 4px;
+        border-bottom: 1px solid #e0e0e0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .listview-item:hover {
+        background: #0080ff;
+        color: white;
+      }
+
+      .listview-item.selected {
+        background: #0080ff;
+        color: white;
+      }
+
+      /* Professional DateTime */
+      .datetime-display {
+        background: #f0f0f0;
+        border: 1px inset #c0c0c0;
+        padding: 4px 8px;
+        font-family: "Courier New", monospace;
+        font-size: 11px;
+        text-align: center;
+      }
+
+      .date-part {
+        font-weight: bold;
+        color: #000080;
+      }
+
+      .time-part {
+        color: #800000;
+        font-size: 12px;
+      }
+
+      /* Icon styles for classic look */
+      .icon-16 {
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .toolbar {
+          flex-direction: column;
+        }
+
+        .dropdown-content {
+          position: fixed;
+          top: auto;
+          right: auto;
+          left: 0;
+          width: 100%;
+        }
+      }
+
+      /* Loading states */
+      .loading {
+        background: url("data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnlOiiAyJYAgRghQQxBHJFhB8AMEQgQIDAAAINYEgIEEiDKgQhJJEgCSAAAIfkECQoAAAAsAAAAABAAEAAAAzMIulmHlJ6gGJLB4JBBhDdBhBAgIJDgoFBKhPEPMJggCBGBJA8qECggIJAkgJEwfHICAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6z+aIl4hHmiKQQEgjAEglhJBAkUUAhDaEHJzHQSuXgAQS0t0gHQBgOWBYiwgPIyIQCGhEGRwOCAZCyEQhw8IyCwPBYBIFBo8gNKxwjBJeQYKBUBBDq2EKCRRgG4qUTu2egAAFhOhIAhIBCNoCxaJ6GYA4DCOISoJbJACwKGOTi5mJdJ+qwIaA");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 16px;
+        padding-left: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Main Window Frame -->
+    <div class="window">
+      <!-- Window Header -->
+      <div class="window-header">
+        <div class="window-title">
+          <i class="fas fa-shield-alt icon-16"></i>
+          سیستم شناسایی ماینرهای رمزارز - {{ session.username or 'عرفان رجبی' }}
+        </div>
+        <div class="window-controls">
+          <span onclick="minimizeWindow()" style="cursor: pointer">_</span>
+          <span
+            onclick="maximizeWindow()"
+            style="cursor: pointer; margin: 0 4px"
+            >□</span
+          >
+          <span onclick="closeWindow()" style="cursor: pointer">×</span>
+        </div>
+      </div>
+
+      <!-- Menu Bar -->
+      <div class="menubar">
+        <div class="dropdown menu-item">
+          فایل
+          <div class="dropdown-content">
+            <a href="{{ url_for('dashboard') }}" class="dropdown-item">
+              <i class="fas fa-home icon-16"></i> صفحه اصلی
+            </a>
+            <a href="{{ url_for('scan') }}" class="dropdown-item">
+              <i class="fas fa-search icon-16"></i> اسکن جدید
+            </a>
+            <div class="dropdown-item" style="border-top: 1px solid #808080">
+              <i class="fas fa-sign-out-alt icon-16"></i> خروج
+            </div>
+          </div>
+        </div>
+
+        <div class="dropdown menu-item">
+          مشاهده
+          <div class="dropdown-content">
+            <a href="{{ url_for('miners') }}" class="dropdown-item">
+              <i class="fas fa-microchip icon-16"></i> ماینرهای یافت شده
+            </a>
+            <a href="{{ url_for('reports') }}" class="dropdown-item">
+              <i class="fas fa-chart-bar icon-16"></i> گزارشات
+            </a>
+            <a href="#" class="dropdown-item" onclick="startLiveMonitoring()">
+              <i class="fas fa-eye icon-16"></i> نظارت زنده
+            </a>
+          </div>
+        </div>
+
+        <div class="dropdown menu-item">
+          ابزار
+          <div class="dropdown-content">
+            <a href="#" class="dropdown-item" onclick="showScanHistory()">
+              <i class="fas fa-history icon-16"></i> تاریخچه اسکن
+            </a>
+            <a href="#" class="dropdown-item" onclick="exportReports()">
+              <i class="fas fa-download icon-16"></i> صادرات گزارش
+            </a>
+            <a href="#" class="dropdown-item" onclick="showSettings()">
+              <i class="fas fa-cog icon-16"></i> تنظیمات
+            </a>
+          </div>
+        </div>
+
+        <div class="dropdown menu-item">
+          راهنما
+          <div class="dropdown-content">
+            <a href="{{ url_for('about') }}" class="dropdown-item">
+              <i class="fas fa-info-circle icon-16"></i> درباره پروژه
+            </a>
+            <a href="#" class="dropdown-item" onclick="showHelp()">
+              <i class="fas fa-question-circle icon-16"></i> راهنمای استفاده
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <button class="toolbar-button" onclick="history.back()" title="برگشت">
+          <i class="fas fa-arrow-right icon-16"></i>
+          برگشت
+        </button>
+        <button
+          class="toolbar-button"
+          onclick="window.location.href='{{ url_for('dashboard') }}'"
+          title="خانه"
+        >
+          <i class="fas fa-home icon-16"></i>
+          خانه
+        </button>
+        <button
+          class="toolbar-button"
+          onclick="location.reload()"
+          title="تازه‌سازی"
+        >
+          <i class="fas fa-sync-alt icon-16"></i>
+          تازه‌سازی
+        </button>
+        <div class="toolbar-separator"></div>
+        <button
+          class="toolbar-button"
+          onclick="window.location.href='{{ url_for('scan') }}'"
+          title="اسکن جدید"
+        >
+          <i class="fas fa-search icon-16"></i>
+          اسکن
+        </button>
+        <button
+          class="toolbar-button"
+          onclick="startLiveMonitoring()"
+          title="نظارت زنده"
+        >
+          <i class="fas fa-eye icon-16"></i>
+          نظارت
+        </button>
+        <div class="toolbar-separator"></div>
+
+        <!-- Professional DateTime Display -->
+        <div class="datetime-display" style="margin-right: auto">
+          <div class="date-part" id="persianDate"></div>
+          <div class="time-part" id="persianTime"></div>
+        </div>
+
+        <!-- Status Indicators -->
+        <div class="status-panel" id="systemStatus">
+          <i class="fas fa-circle" style="color: #008000"></i> آنلاین
+        </div>
+        <div class="status-panel" id="networkStatus">
+          <i class="fas fa-wifi" style="color: #000080"></i> متصل
+        </div>
+      </div>
+
+      <!-- Window Content -->
+      <div class="window-content">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div
+          class="panel"
+          style="background: {{ '#ffe0e0' if category == 'error' else '#e0ffe0' }}; border-color: {{ '#ff0000' if category == 'error' else '#008000' }};"
+        >
+          {{ message }}
+          <button
+            onclick="this.parentElement.style.display='none'"
+            style="
+              float: left;
+              background: transparent;
+              border: none;
+              font-weight: bold;
+            "
+          >
+            ×
+          </button>
+        </div>
+        {% endfor %} {% endif %} {% endwith %} {% block content %}{% endblock %}
+      </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="statusbar">
+      <div class="status-panel">آماده</div>
+      <div class="status-panel" id="scanCount">اسکن‌های فعال: 0</div>
+      <div class="status-panel">طراح: عرفان رجبی</div>
+      <div class="status-panel" id="currentAction">در انتظار...</div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/persian-calendar.js') }}"></script>
+    <script>
+      // Persian Calendar instance
+      let persianCalendar = null;
+      let liveMonitoringActive = false;
+
+      // Initialize Persian Calendar
+      function initializePersianCalendar() {
+          if (typeof PersianCalendar !== 'undefined') {
+              persianCalendar = new PersianCalendar();
+          }
+      }
+
+      // Professional DateTime Update
+      function updateDateTime() {
+          if (!persianCalendar) {
+              initializePersianCalendar();
+          }
+
+          const dateElement = document.getElementById('persianDate');
+          const timeElement = document.getElementById('persianTime');
+
+          if (persianCalendar && dateElement && timeElement) {
+              const persianDate = persianCalendar.getCurrentPersianDate();
+              const currentTime = persianCalendar.getCurrentTime();
+
+              dateElement.textContent = persianDate.formatted;
+              timeElement.textContent = currentTime;
+          }
+      }
+
+      // Network Status Monitoring
+      function updateNetworkStatus() {
+          const systemStatus = document.getElementById('systemStatus');
+          const networkStatus = document.getElementById('networkStatus');
+
+          if (navigator.onLine) {
+              if (systemStatus) {
+                  systemStatus.innerHTML = '<i class="fas fa-circle" style="color: #008000;"></i> آنلاین';
+              }
+              if (networkStatus) {
+                  networkStatus.innerHTML = '<i class="fas fa-wifi" style="color: #000080;"></i> متصل';
+              }
+          } else {
+              if (systemStatus) {
+                  systemStatus.innerHTML = '<i class="fas fa-circle" style="color: #ff0000;"></i> آفلاین';
+              }
+              if (networkStatus) {
+                  networkStatus.innerHTML = '<i class="fas fa-wifi-slash" style="color: #ff0000;"></i> قطع';
+              }
+          }
+      }
+
+      // Window Controls
+      function minimizeWindow() {
+          document.body.style.display = 'none';
+          setTimeout(() => { document.body.style.display = 'block'; }, 1000);
+      }
+
+      function maximizeWindow() {
+          if (document.body.style.transform === 'scale(1.1)') {
+              document.body.style.transform = 'scale(1)';
+          } else {
+              document.body.style.transform = 'scale(1.1)';
+          }
+      }
+
+      function closeWindow() {
+          if (confirm('آیا مطمئن هستید ��ه می‌خواهید برنامه را ببندید؟')) {
+              window.location.href = '{{ url_for('logout') }}';
+          }
+      }
+
+      // Live Monitoring
+      function startLiveMonitoring() {
+          if (liveMonitoringActive) return;
+          liveMonitoringActive = true;
+
+          document.getElementById('currentAction').textContent = 'نظارت زنده فعال';
+
+          const interval = setInterval(function() {
+              if (!liveMonitoringActive) {
+                  clearInterval(interval);
+                  return;
+              }
+
+              fetch('/api/live_monitor')
+                  .then(response => {
+                      if (!response.ok) {
+                          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                      }
+                      return response.json();
+                  })
+                  .then(data => {
+                      if (data.suspicious_processes && data.suspicious_processes.length > 0) {
+                          showAlert('فرآیند مشکوک شناسایی شد!', 'error');
+                      }
+                      if (data.network_connections && data.network_connections.length > 0) {
+                          showAlert('اتصال شبکه مشکوک شناسایی شد!', 'error');
+                      }
+                  })
+                  .catch(error => {
+                      console.error('Live monitoring error:', error);
+                  });
+          }, 5000);
+      }
+
+      function showAlert(message, type) {
+          const alertDiv = document.createElement('div');
+          alertDiv.className = 'panel';
+          alertDiv.style.background = type === 'error' ? '#ffe0e0' : '#e0ffe0';
+          alertDiv.style.borderColor = type === 'error' ? '#ff0000' : '#008000';
+          alertDiv.innerHTML = `
+              ${message}
+              <button onclick="this.parentElement.remove()" style="float: left; background: transparent; border: none; font-weight: bold;">×</button>
+          `;
+          document.querySelector('.window-content').insertBefore(alertDiv, document.querySelector('.window-content').firstChild);
+
+          setTimeout(() => {
+              alertDiv.remove();
+          }, 5000);
+      }
+
+      // System Metrics Update
+      function updateSystemMetrics() {
+          fetch('/api/system_metrics')
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                  }
+                  return response.json();
+              })
+              .then(data => {
+                  // Update status if needed
+              })
+              .catch(error => console.error('System metrics error:', error));
+      }
+
+      // Utility Functions
+      function showScanHistory() {
+          window.location.href = '/scan_history';
+      }
+
+      function exportReports() {
+          document.getElementById('currentAction').textContent = 'در حال صادرات گزارش...';
+          // Implementation for export
+      }
+
+      function showSettings() {
+          alert('تنظیمات در نسخه بعدی اضافه خواهد شد');
+      }
+
+      function showHelp() {
+          alert('راهنمای استفاده در نسخه بعدی اضافه خواهد شد');
+      }
+
+      // Initialize
+      function initializeLiveUpdates() {
+          updateDateTime();
+          updateNetworkStatus();
+
+          // Update every second
+          setInterval(updateDateTime, 1000);
+          setInterval(updateNetworkStatus, 5000);
+          setInterval(updateSystemMetrics, 10000);
+      }
+
+      // Listen for events
+      window.addEventListener('online', updateNetworkStatus);
+      window.addEventListener('offline', updateNetworkStatus);
+
+      // Start updates when page loads
+      document.addEventListener('DOMContentLoaded', initializeLiveUpdates);
+    </script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>
