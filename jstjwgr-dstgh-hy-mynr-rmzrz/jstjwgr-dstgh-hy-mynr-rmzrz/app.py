@@ -345,15 +345,7 @@ def ensure_logged_in():
 # Routes
 @app.route('/')
 def index():
-    # Auto-login as admin user
-    if 'user_id' not in session:
-        admin = User.query.filter_by(username='admin').first()
-        if admin:
-            session['user_id'] = admin.id
-            session['username'] = admin.username
-            session['role'] = admin.role
-            admin.last_login = datetime.utcnow()
-            db.session.commit()
+    ensure_logged_in()
     
     # آمار کلی
     total_miners = DetectedMiner.query.filter_by(user_id=session['user_id']).count()
