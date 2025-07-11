@@ -345,6 +345,11 @@ def ensure_logged_in():
 # Routes
 @app.route('/')
 def index():
+    # Show loading screen first
+    return render_template('loading.html')
+
+@app.route('/dashboard')
+def dashboard():
     ensure_logged_in()
     
     # آمار کلی
@@ -448,7 +453,7 @@ def scan():
     return render_template('scan.html')
 
 def run_scan(session_id):
-    """اجرای اسکن در پس‌زمینه"""
+    """اجرای ا��کن در پس‌زمینه"""
     scan_session = ScanSession.query.filter_by(session_id=session_id).first()
     if not scan_session:
         return
