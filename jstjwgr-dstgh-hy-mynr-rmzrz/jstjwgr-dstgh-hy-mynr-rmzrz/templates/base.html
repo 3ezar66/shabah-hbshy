@@ -240,8 +240,10 @@
                 .catch(error => console.error('System metrics error:', error));
         }
 
-        // بروزرسانی هر 10 ثانیه
+                // بروزرسانی هر 10 ثانیه - فقط برای کاربران وارد شده
+        {% if session.user_id %}
         setInterval(updateSystemMetrics, 10000);
+        {% endif %}
     </script>
     {% block scripts %}{% endblock %}
 </body>
