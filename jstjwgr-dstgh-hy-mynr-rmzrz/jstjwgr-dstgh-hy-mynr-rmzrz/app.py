@@ -331,6 +331,17 @@ class MinerDetectionEngine:
 # نمونه detection engine
 detection_engine = MinerDetectionEngine()
 
+# Helper function for auto-login
+def ensure_logged_in():
+    if 'user_id' not in session:
+        admin = User.query.filter_by(username='admin').first()
+        if admin:
+            session['user_id'] = admin.id
+            session['username'] = admin.username
+            session['role'] = admin.role
+            admin.last_login = datetime.utcnow()
+            db.session.commit()
+
 # Routes
 @app.route('/')
 def index():
