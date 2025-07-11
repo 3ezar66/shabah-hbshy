@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 سیستم جامع شناسایی و نظارت بر ماینرهای رمزارز
-نرم‌افزار حرفه‌ای چندکاربره با رابط وب و بانک اطلاعاتی
+نرم‌افزار حرفه‌ای چندکاربره با رابط وب �� بانک اطلاعاتی
 """
 
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash
@@ -26,7 +26,7 @@ from concurrent.futures import ThreadPoolExecutor
 import uuid
 import secrets
 
-# ��نظیمات لاگ
+# تنظیمات لاگ
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -368,7 +368,7 @@ def dashboard():
         db.func.count(DetectedMiner.id).label('count')
     ).filter_by(user_id=session['user_id']).group_by(DetectedMiner.threat_level).all()
     
-    return render_template('dashboard.html', 
+        return render_template('dashboard_win98.html', 
                          total_miners=total_miners,
                          active_miners=active_miners,
                          recent_scans=recent_scans,
