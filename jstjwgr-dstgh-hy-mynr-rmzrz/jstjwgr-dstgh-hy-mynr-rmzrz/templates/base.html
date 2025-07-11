@@ -119,6 +119,106 @@
         border-radius: 15px;
         margin-bottom: 20px;
       }
+
+      /* Live DateTime Styles */
+      .live-datetime {
+        text-align: center;
+        font-weight: 500;
+      }
+      .persian-date {
+        font-size: 14px;
+        color: #667eea;
+        font-weight: 600;
+      }
+      .persian-time {
+        font-size: 18px;
+        color: #333;
+        font-weight: 700;
+        font-family: "Courier New", monospace;
+      }
+
+      /* Status Indicators */
+      .status-indicators {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .status-item {
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        animation: pulse-dot 2s infinite;
+      }
+      .status-item.online .status-dot {
+        color: #28a745;
+      }
+      .status-item.offline .status-dot {
+        color: #dc3545;
+      }
+      .status-icon {
+        color: #17a2b8;
+      }
+
+      @keyframes pulse-dot {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      /* Navigation Buttons */
+      .nav-buttons .btn {
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+      .nav-buttons .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .navbar-nav.mx-auto {
+          display: none;
+        }
+        .nav-buttons .btn {
+          width: 30px;
+          height: 30px;
+          font-size: 12px;
+        }
+      }
+
+      /* Developer Info Styles */
+      .developer-info {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        z-index: 1000;
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+      }
+      .developer-info:hover {
+        opacity: 1;
+      }
     </style>
   </head>
   <body>
