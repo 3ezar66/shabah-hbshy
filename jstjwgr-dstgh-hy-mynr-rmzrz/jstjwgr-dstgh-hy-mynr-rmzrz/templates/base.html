@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -171,19 +170,37 @@
             startLiveMonitoring();
         });
 
+                let liveMonitoringActive = false;
+
         function startLiveMonitoring() {
+            if (liveMonitoringActive) return;
+            liveMonitoringActive = true;
+
             const interval = setInterval(function() {
+                if (!liveMonitoringActive) {
+                    clearInterval(interval);
+                    return;
+                }
+
                 fetch('/api/live_monitor')
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
-                        if (data.suspicious_processes.length > 0) {
+                        if (data.suspicious_processes && data.suspicious_processes.length > 0) {
                             showAlert('فرآیند مشکوک شناسایی شد!', 'warning');
                         }
-                        if (data.network_connections.length > 0) {
+                        if (data.network_connections && data.network_connections.length > 0) {
                             showAlert('اتصال شبکه مشکوک شناسایی شد!', 'danger');
                         }
                     })
-                    .catch(error => console.error('Error:', error));
+                    .catch(error => {
+                        console.error('Live monitoring error:', error);
+                        // Don't clear interval on temporary errors
+                    });
             }, 5000);
         }
 
