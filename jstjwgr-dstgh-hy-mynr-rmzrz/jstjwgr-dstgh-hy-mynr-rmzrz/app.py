@@ -368,7 +368,7 @@ def dashboard():
         db.func.count(DetectedMiner.id).label('count')
     ).filter_by(user_id=session['user_id']).group_by(DetectedMiner.threat_level).all()
     
-        return render_template('dashboard_win98.html', 
+            return render_template('dashboard_win98.html', 
                          total_miners=total_miners,
                          active_miners=active_miners,
                          recent_scans=recent_scans,
