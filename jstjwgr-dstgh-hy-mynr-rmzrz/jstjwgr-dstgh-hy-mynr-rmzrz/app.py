@@ -142,8 +142,8 @@ class MinerDetectionEngine:
 
     def scan_port(self, ip, port, timeout=2):
         """اسکن تک پورت"""
-        try:
-                        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(timeout)
             result = sock.connect_ex((ip, port))
             sock.close()
