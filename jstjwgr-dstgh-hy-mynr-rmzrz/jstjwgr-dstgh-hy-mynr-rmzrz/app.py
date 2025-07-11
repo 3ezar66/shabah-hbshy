@@ -418,7 +418,7 @@ def register():
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('login'))
+    return redirect(url_for('index'))
 
 @app.route('/scan', methods=['GET', 'POST'])
 def scan():
