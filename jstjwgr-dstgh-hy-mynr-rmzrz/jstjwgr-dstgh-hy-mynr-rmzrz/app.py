@@ -170,11 +170,11 @@ class MinerDetectionEngine:
 
     def get_hostname(self, ip):
         """دریافت نام میزبان"""
-        try:
+                try:
             hostname = socket.gethostbyaddr(ip)[0]
-    return hostname
+            return hostname
         except:
-    return None
+            return None
 
     def geolocate_ip(self, ip):
         """مکان‌یابی IP"""
