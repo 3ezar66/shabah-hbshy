@@ -345,6 +345,105 @@
     <script>
       let liveMonitoringActive = false;
 
+      // Persian Calendar and Time Functions
+      function getPersianDate() {
+        const now = new Date();
+        const persianDays = [
+          "یکشنبه",
+          "دوشنبه",
+          "سه‌شنبه",
+          "چهارشنبه",
+          "پنج‌شنبه",
+          "جمعه",
+          "شنبه",
+        ];
+        const persianMonths = [
+          "فروردین",
+          "اردیبهشت",
+          "خردا��",
+          "تیر",
+          "مرداد",
+          "شهریور",
+          "مهر",
+          "آبان",
+          "آذر",
+          "دی",
+          "بهمن",
+          "اسفند",
+        ];
+
+        const dayOfWeek = persianDays[now.getDay()];
+
+        // Simple Persian date conversion (approximate)
+        const persianYear = now.getFullYear() - 621;
+        const persianMonth = persianMonths[now.getMonth() % 12];
+        const persianDay = now.getDate();
+
+        return `${dayOfWeek}، ${persianDay} ${persianMonth} ${persianYear}`;
+      }
+
+      function updateDateTime() {
+        const now = new Date();
+        const persianDate = getPersianDate();
+        const time = now.toLocaleTimeString("fa-IR", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+
+        const dateElement = document.getElementById("persianDate");
+        const timeElement = document.getElementById("persianTime");
+
+        if (dateElement) dateElement.textContent = persianDate;
+        if (timeElement) timeElement.textContent = time;
+      }
+
+      // Network Status Monitoring
+      function updateNetworkStatus() {
+        const systemStatus = document.getElementById("systemStatus");
+        const networkStatus = document.getElementById("networkStatus");
+
+        // Check if online
+        if (navigator.onLine) {
+          if (systemStatus) {
+            systemStatus.className = "status-item online";
+            systemStatus.innerHTML =
+              '<i class="fas fa-circle status-dot"></i> آنلاین';
+          }
+          if (networkStatus) {
+            networkStatus.innerHTML =
+              '<i class="fas fa-wifi status-icon"></i> متصل';
+          }
+        } else {
+          if (systemStatus) {
+            systemStatus.className = "status-item offline";
+            systemStatus.innerHTML =
+              '<i class="fas fa-circle status-dot"></i> آفلاین';
+          }
+          if (networkStatus) {
+            networkStatus.innerHTML =
+              '<i class="fas fa-wifi-slash status-icon"></i> قطع';
+          }
+        }
+      }
+
+      // Initialize live updates
+      function initializeLiveUpdates() {
+        updateDateTime();
+        updateNetworkStatus();
+
+        // Update every second
+        setInterval(updateDateTime, 1000);
+        setInterval(updateNetworkStatus, 5000);
+      }
+
+      // Listen for online/offline events
+      window.addEventListener("online", updateNetworkStatus);
+      window.addEventListener("offline", updateNetworkStatus);
+
+      // Start updates when page loads
+      document.addEventListener("DOMContentLoaded", initializeLiveUpdates);
+
       // نظارت زنده
       document
         .getElementById("liveMonitor")
