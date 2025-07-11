@@ -422,8 +422,7 @@ def logout():
 
 @app.route('/scan', methods=['GET', 'POST'])
 def scan():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
+    ensure_logged_in()
     
     if request.method == 'POST':
         scan_type = request.form['scan_type']
