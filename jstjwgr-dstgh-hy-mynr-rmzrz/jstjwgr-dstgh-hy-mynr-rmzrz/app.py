@@ -197,7 +197,7 @@ class MinerDetectionEngine:
         return None
 
     def detect_miner_processes(self):
-        """تشخیص فرآیندهای ماینر"""
+        """تشخیص فرآیند��ای ماینر"""
         suspicious_processes = []
         for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_info']):
             try:
@@ -453,7 +453,7 @@ def scan():
     return render_template('scan.html')
 
 def run_scan(session_id):
-    """اجرای ا��کن در پس‌زمینه"""
+    """اجرای اسکن در پس‌زمینه"""
     scan_session = ScanSession.query.filter_by(session_id=session_id).first()
     if not scan_session:
         return
@@ -595,7 +595,7 @@ def reports():
 def system_metrics():
     ensure_logged_in()
     
-    # جمع‌آوری معیارهای سیستم
+    # جمع‌��وری معیارهای سیستم
     cpu_usage = psutil.cpu_percent()
     memory = psutil.virtual_memory()
     disk = psutil.disk_usage('/')
@@ -660,6 +660,11 @@ with app.app_context():
         )
         db.session.add(admin)
         db.session.commit()
+
+@app.route('/about')
+def about():
+    ensure_logged_in()
+    return render_template('about.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
