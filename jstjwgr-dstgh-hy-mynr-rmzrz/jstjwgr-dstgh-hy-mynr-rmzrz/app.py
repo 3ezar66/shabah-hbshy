@@ -136,9 +136,9 @@ class MinerDetectionEngine:
         try:
             result = subprocess.run(['ping', '-c', '1', '-W', '1', ip], 
                                   capture_output=True, text=True)
-    return result.returncode == 0
+            return result.returncode == 0
         except:
-    return False
+            return False
 
     def scan_port(self, ip, port, timeout=2):
         """اسکن تک پورت"""
