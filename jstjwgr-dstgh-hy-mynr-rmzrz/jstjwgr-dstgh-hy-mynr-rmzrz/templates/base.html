@@ -166,11 +166,13 @@
     <script>
         let liveMonitoringActive = false;
         
-        // نظارت زنده
+                // نظارت زنده - فقط برای کاربران وارد شده
+        {% if session.user_id %}
         document.getElementById('liveMonitor')?.addEventListener('click', function(e) {
             e.preventDefault();
             startLiveMonitoring();
         });
+        {% endif %}
 
         function startLiveMonitoring() {
             if (liveMonitoringActive) return;
