@@ -138,10 +138,10 @@ class MinerDetectionEngine:
                                   capture_output=True, text=True)
             return result.returncode == 0
         except:
-            return False
+                        return False
 
-                def scan_port(self, ip, port, timeout=2):
-            """اسکن تک پورت"""
+    def scan_port(self, ip, port, timeout=2):
+        """اسکن تک پورت"""
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(timeout)
