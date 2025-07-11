@@ -136,9 +136,9 @@ class MinerDetectionEngine:
         try:
             result = subprocess.run(['ping', '-c', '1', '-W', '1', ip], 
                                   capture_output=True, text=True)
-            return result.returncode == 0
+    return result.returncode == 0
         except:
-            return False
+    return False
 
     def scan_port(self, ip, port, timeout=2):
         """اسکن تک پورت"""
@@ -147,9 +147,9 @@ class MinerDetectionEngine:
             sock.settimeout(timeout)
             result = sock.connect_ex((ip, port))
             sock.close()
-            return result == 0
+    return result == 0
         except:
-            return False
+    return False
 
     def get_mac_address(self, ip):
         """دریافت آدرس MAC"""
@@ -172,9 +172,9 @@ class MinerDetectionEngine:
         """دریافت نام میزبان"""
         try:
             hostname = socket.gethostbyaddr(ip)[0]
-            return hostname
+    return hostname
         except:
-            return None
+    return None
 
     def geolocate_ip(self, ip):
         """مکان‌یابی IP"""
@@ -245,9 +245,9 @@ class MinerDetectionEngine:
                             'service': self.miner_ports[conn.raddr.port]
                         })
             
-            return suspicious_connections
+    return suspicious_connections
         except:
-            return []
+    return []
 
     def scan_network_range(self, network_range, progress_callback=None):
         """اسکن رنج شبکه"""
@@ -368,7 +368,7 @@ def dashboard():
         db.func.count(DetectedMiner.id).label('count')
     ).filter_by(user_id=session['user_id']).group_by(DetectedMiner.threat_level).all()
     
-            return render_template('dashboard_win98.html', 
+    return render_template('dashboard_win98.html', 
                          total_miners=total_miners,
                          active_miners=active_miners,
                          recent_scans=recent_scans,
@@ -390,7 +390,7 @@ def login():
             user.last_login = datetime.utcnow()
             db.session.commit()
             
-            return redirect(url_for('index'))
+    return redirect(url_for('index'))
         else:
             flash('نام کاربری یا رمز عبور اشتباه است', 'error')
     
@@ -405,11 +405,11 @@ def register():
         
         if User.query.filter_by(username=username).first():
             flash('نام کاربری قبلاً استفاده شده است', 'error')
-            return render_template('register.html')
+    return render_template('register.html')
         
         if User.query.filter_by(email=email).first():
             flash('ایمیل قبلاً استفاده شده است', 'error')
-            return render_template('register.html')
+    return render_template('register.html')
         
         user = User(
             username=username,
