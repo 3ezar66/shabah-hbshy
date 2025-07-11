@@ -164,9 +164,9 @@ class MinerDetectionEngine:
                         for part in parts:
                             if ':' in part and len(part) == 17:
                                 return part
-        except:
+                except:
             pass
-                return None
+        return None
 
     def get_hostname(self, ip):
         """دریافت نام میزبان"""
