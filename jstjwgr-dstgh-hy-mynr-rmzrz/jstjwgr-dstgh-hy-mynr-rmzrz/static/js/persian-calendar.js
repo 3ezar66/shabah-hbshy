@@ -1,5 +1,5 @@
 // Persian (Jalali) Calendar Conversion Functions
-// Based on Kazimierz M. Borkowski algorithm
+// Accurate Persian calendar implementation
 
 class PersianCalendar {
   constructor() {
@@ -32,11 +32,12 @@ class PersianCalendar {
   // Convert Gregorian to Persian date
   gregorianToPersian(gYear, gMonth, gDay) {
     const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-    let jy, jm, jd, gy, gm, gd;
 
-    gy = gYear;
-    gm = gMonth;
-    gd = gDay;
+    let gy = gYear;
+    let gm = gMonth;
+    let gd = gDay;
+
+    let jy, jm, jd;
 
     if (gy <= 1600) {
       jy = 0;
@@ -46,13 +47,8 @@ class PersianCalendar {
       gy -= 1600;
     }
 
-    if (gm > 2) {
-      gy2 = gy + 1;
-    } else {
-      gy2 = gy;
-    }
-
-    const days =
+    let gy2 = gm > 2 ? gy + 1 : gy;
+    let days =
       365 * gy +
       Math.floor((gy2 + 3) / 4) +
       Math.floor((gy2 + 99) / 100) -
