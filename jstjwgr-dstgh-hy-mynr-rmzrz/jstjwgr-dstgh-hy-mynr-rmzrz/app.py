@@ -140,8 +140,8 @@ class MinerDetectionEngine:
         except:
             return False
 
-        def scan_port(self, ip, port, timeout=2):
-        """اسکن تک پورت"""
+                def scan_port(self, ip, port, timeout=2):
+            """اسکن تک پورت"""
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(timeout)
@@ -564,7 +564,7 @@ def reports():
     # آمار کلی
     total_miners = DetectedMiner.query.filter_by(user_id=session['user_id']).count()
     
-    # آمار بر اساس سطح تهدید
+    # آمار بر اساس سط�� تهدید
     threat_stats = db.session.query(
         DetectedMiner.threat_level,
         db.func.count(DetectedMiner.id).label('count')
