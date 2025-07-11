@@ -164,24 +164,24 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        let liveMonitoringActive = false;
+        
         // نظارت زنده
         document.getElementById('liveMonitor')?.addEventListener('click', function(e) {
             e.preventDefault();
             startLiveMonitoring();
         });
 
-                let liveMonitoringActive = false;
-
         function startLiveMonitoring() {
             if (liveMonitoringActive) return;
             liveMonitoringActive = true;
-
+            
             const interval = setInterval(function() {
                 if (!liveMonitoringActive) {
                     clearInterval(interval);
                     return;
                 }
-
+                
                 fetch('/api/live_monitor')
                     .then(response => {
                         if (!response.ok) {
@@ -218,7 +218,7 @@
             }, 5000);
         }
 
-                // بروزرسانی معیارهای سیستم
+        // بروزرسانی معیارهای سیستم
         function updateSystemMetrics() {
             fetch('/api/system_metrics')
                 .then(response => {
