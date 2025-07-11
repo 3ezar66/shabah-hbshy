@@ -351,57 +351,31 @@
     <script>
       let liveMonitoringActive = false;
 
-      // Persian Calendar and Time Functions
-      function getPersianDate() {
-        const now = new Date();
-        const persianDays = [
-          "یکشنبه",
-          "دوشنبه",
-          "سه‌شنبه",
-          "چهارشنبه",
-          "پنج‌شنبه",
-          "جمعه",
-          "شنبه",
-        ];
-        const persianMonths = [
-          "فروردین",
-          "اردیبهشت",
-          "خرداد",
-          "تیر",
-          "مرداد",
-          "شهریور",
-          "مهر",
-          "آبان",
-          "آذر",
-          "دی",
-          "بهمن",
-          "اسفند",
-        ];
+      // Persian Calendar instance
+      let persianCalendar = null;
 
-        const dayOfWeek = persianDays[now.getDay()];
-
-        // Simple Persian date conversion (approximate)
-        const persianYear = now.getFullYear() - 621;
-        const persianMonth = persianMonths[now.getMonth() % 12];
-        const persianDay = now.getDate();
-
-        return `${dayOfWeek}، ${persianDay} ${persianMonth} ${persianYear}`;
+      // Initialize Persian Calendar
+      function initializePersianCalendar() {
+        if (typeof PersianCalendar !== "undefined") {
+          persianCalendar = new PersianCalendar();
+        }
       }
 
       function updateDateTime() {
-        const now = new Date();
-        const persianDate = getPersianDate();
-        const time = now.toLocaleTimeString("fa-IR", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        });
+        if (!persianCalendar) {
+          initializePersianCalendar();
+        }
 
         const dateElement = document.getElementById("persianDate");
         const timeElement = document.getElementById("persianTime");
 
-        if (dateElement) dateElement.textContent = persianDate;
-        if (timeElement) timeElement.textContent = time;
+        if (persianCalendar && dateElement && timeElement) {
+          const persianDate = persianCalendar.getCurrentPersianDate();
+          const currentTime = persianCalendar.getCurrentTime();
+
+          dateElement.textContent = persianDate.formatted;
+          timeElement.textContent = currentTime;
+        }
       }
 
       // Network Status Monitoring
@@ -488,7 +462,7 @@
                 data.network_connections &&
                 data.network_connections.length > 0
               ) {
-                showAlert("اتصال شبکه مشکوک ش��اسایی شد!", "danger");
+                showAlert("��تصال شبکه مشکوک ش��اسایی شد!", "danger");
               }
             })
             .catch((error) => {
