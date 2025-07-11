@@ -168,7 +168,7 @@ class MinerDetectionEngine:
             pass
         return None
 
-        def get_hostname(self, ip):
+            def get_hostname(self, ip):
         """دریافت نام میزبان"""
         try:
             hostname = socket.gethostbyaddr(ip)[0]
