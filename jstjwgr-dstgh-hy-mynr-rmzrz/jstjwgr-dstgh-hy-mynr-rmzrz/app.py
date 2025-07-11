@@ -230,7 +230,7 @@ class MinerDetectionEngine:
         return open_ports
 
     def analyze_network_traffic(self, ip):
-        """تحلیل تراف��ک شبکه"""
+        """تحلیل ترافیک شبکه"""
         try:
             connections = psutil.net_connections()
             suspicious_connections = []
@@ -618,8 +618,7 @@ def system_metrics():
 
 @app.route('/api/live_monitor')
 def live_monitor():
-    if 'user_id' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
+    ensure_logged_in()
     
     # نظارت زنده بر فرآیندها
     suspicious_processes = detection_engine.detect_miner_processes()
