@@ -218,15 +218,26 @@
             }, 5000);
         }
 
-        // بروزرسانی معیارهای سیستم
+                // بروزرسانی معیارهای سیستم
         function updateSystemMetrics() {
             fetch('/api/system_metrics')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('cpu-usage').textContent = data.cpu_usage.toFixed(1) + '%';
-                    document.getElementById('memory-usage').textContent = data.memory_usage.toFixed(1) + '%';
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
                 })
-                .catch(error => console.error('Error:', error));
+                .then(data => {
+                    const cpuElement = document.getElementById('cpu-usage');
+                    const memoryElement = document.getElementById('memory-usage');
+                    if (cpuElement && data.cpu_usage !== undefined) {
+                        cpuElement.textContent = data.cpu_usage.toFixed(1) + '%';
+                    }
+                    if (memoryElement && data.memory_usage !== undefined) {
+                        memoryElement.textContent = data.memory_usage.toFixed(1) + '%';
+                    }
+                })
+                .catch(error => console.error('System metrics error:', error));
         }
 
         // بروزرسانی هر 10 ثانیه
