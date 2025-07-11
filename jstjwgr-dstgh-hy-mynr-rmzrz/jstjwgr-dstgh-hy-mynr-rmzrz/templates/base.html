@@ -164,15 +164,14 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        {% if session.user_id %}
         let liveMonitoringActive = false;
         
-                // نظارت زنده - فقط برای کاربران وارد شده
-        {% if session.user_id %}
+        // نظارت زنده
         document.getElementById('liveMonitor')?.addEventListener('click', function(e) {
             e.preventDefault();
             startLiveMonitoring();
         });
-        {% endif %}
 
         function startLiveMonitoring() {
             if (liveMonitoringActive) return;
@@ -196,7 +195,7 @@
                             showAlert('فرآیند مشکوک شناسایی شد!', 'warning');
                         }
                         if (data.network_connections && data.network_connections.length > 0) {
-                            showAlert('اتصال شبکه مشکوک شناسایی شد!', 'danger');
+                            showAlert('اتصال شبکه مشکوک ش��اسایی شد!', 'danger');
                         }
                     })
                     .catch(error => {
@@ -242,8 +241,7 @@
                 .catch(error => console.error('System metrics error:', error));
         }
 
-                // بروزرسانی هر 10 ثانیه - فقط برای کاربران وارد شده
-        {% if session.user_id %}
+        // بروزرسانی هر 10 ثانیه - فقط برای کاربران وارد شده
         setInterval(updateSystemMetrics, 10000);
         {% endif %}
     </script>
