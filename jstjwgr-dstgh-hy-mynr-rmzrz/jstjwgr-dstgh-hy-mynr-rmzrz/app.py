@@ -140,9 +140,9 @@ class MinerDetectionEngine:
         except:
             return False
 
-    def scan_port(self, ip, port, timeout=2):
+        def scan_port(self, ip, port, timeout=2):
         """اسکن تک پورت"""
-                try:
+        try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(timeout)
             result = sock.connect_ex((ip, port))
@@ -197,7 +197,7 @@ class MinerDetectionEngine:
         return None
 
     def detect_miner_processes(self):
-        """تشخیص فرآیندهای ماینر"""
+        """تشخیص فرآیندهای مای��ر"""
         suspicious_processes = []
         for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_info']):
             try:
