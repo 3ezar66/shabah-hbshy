@@ -197,7 +197,7 @@ class MinerDetectionEngine:
         return None
 
     def detect_miner_processes(self):
-        """تشخیص فرآیند��ای ماینر"""
+        """تشخیص فرآیندهای ماینر"""
         suspicious_processes = []
         for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_info']):
             try:
@@ -347,6 +347,11 @@ def ensure_logged_in():
 def index():
     # Show loading screen first
     return render_template('loading.html')
+
+@app.route('/login_form')
+def login_form():
+    # Show login form after loading
+    return render_template('login_classic.html')
 
 @app.route('/dashboard')
 def dashboard():
@@ -595,7 +600,7 @@ def reports():
 def system_metrics():
     ensure_logged_in()
     
-    # جمع‌��وری معیارهای سیستم
+    # جمع‌آوری معیارهای سیستم
     cpu_usage = psutil.cpu_percent()
     memory = psutil.virtual_memory()
     disk = psutil.disk_usage('/')
