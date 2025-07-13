@@ -397,9 +397,9 @@ def ai_analyze():
         data = request.json or {}
         network_data = data.get('network_data', {})
 
-        from modules.ai.free_ai_models import FreeAIAnalyzer
+                from modules.ai.free_ai_models import FreeAIAnalyzer
         analyzer = FreeAIAnalyzer()
-                analysis = analyzer.analyze_network_pattern(network_data)
+        analysis = analyzer.analyze_network_pattern(network_data)
 
         return jsonify(analysis)
     except ImportError:
@@ -431,7 +431,7 @@ def get_cities(province_code):
     cities_data = {
         'ilam': ['ایلام', 'ایوان', 'دره‌شهر', 'دهلران', 'آبدانان', 'مهران', 'ملکشاهی', 'سرابله', 'چرداول'],
         'tehran': ['تهران', 'کرج', 'ری', 'شهریار', 'ورامین'],
-        'isfahan': ['اصفهان', 'کاشان', 'نجف‌آباد', 'خمینی‌شهر', 'شاهین‌شهر'],
+        'isfahan': ['ا��فهان', 'کاشان', 'نجف‌آباد', 'خمینی‌شهر', 'شاهین‌شهر'],
         'shiraz': ['شیراز', 'کازرون', 'مرودشت', 'جهرم', 'لار'],
         'tabriz': ['تبریز', 'مراغه', 'اهر', 'بناب', 'میانه'],
         'mashhad': ['مشهد', 'نیشابو��', 'سبزوار', 'کاشمر', 'گناباد']
