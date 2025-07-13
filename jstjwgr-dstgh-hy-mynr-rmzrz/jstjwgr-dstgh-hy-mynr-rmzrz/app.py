@@ -340,9 +340,9 @@ def geoip_lookup(ip):
         import os
         sys.path.append(os.path.dirname(__file__))
 
-        from modules.geolocation.iran_geoip import IranGeoIP
+                from modules.geolocation.iran_geoip import IranGeoIP
         geoip = IranGeoIP()
-                location = geoip.lookup_ip(ip)
+        location = geoip.lookup_ip(ip)
 
         return jsonify(location)
     except ImportError:
