@@ -372,8 +372,8 @@ def start_rf_scan():
             'status': 'success',
             'message': 'اسکن RF شروع شد',
             'duration': duration
-        })
-        except ImportError:
+                })
+    except ImportError:
         return jsonify({
             'status': 'error',
             'message': 'ماژول اسکن RF در دسترس نیست'
