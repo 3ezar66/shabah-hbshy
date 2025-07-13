@@ -80,7 +80,7 @@ def ensure_logged_in():
 # Routes
 @app.route('/')
 def index():
-    return render_template('loading_underwater.html')
+    return render_template('loading_glitch.html')
 
 @app.route('/login_form')
 def login_form():
@@ -286,42 +286,16 @@ def start_scan():
                 'results': results
             })
 
-        except ImportError as e:
-            # اگر ماژول موجود نیست، شبیه‌سازی انجام می‌دهیم
-            import random
-            import time
-
-            # شبیه‌سازی اسکن
-            time.sleep(2)  # تأخیر برای شبیه‌سازی
-
-            mock_results = {
-                'scan_id': session_id,
-                'target': target,
-                'total_hosts': random.randint(10, 50),
-                'summary': {
-                    'confirmed_miners': random.randint(0, 3),
-                    'potential_miners': random.randint(0, 5),
-                    'suspicious_hosts': random.randint(0, 8)
-                },
-                'scanned_hosts': {}
-            }
-
-            # به‌روزرسانی session
-            scan_session.status = 'completed'
+                except ImportError as e:
+            # اعلام خطا در صورت عدم دسترسی به ماژول
+            scan_session.status = 'failed'
             scan_session.end_time = datetime.utcnow()
-            scan_session.total_hosts = mock_results['total_hosts']
-            scan_session.detected_miners = mock_results['summary']['confirmed_miners']
-            scan_session.results = str(mock_results)
-            scan_session.progress = 100
-
             db.session.commit()
 
             return jsonify({
-                'status': 'success',
-                'scan_id': session_id,
-                'message': 'اسکن شبیه‌سازی شده کامل شد',
-                'results': mock_results
-            })
+                'status': 'error',
+                'message': f'ماژول اسکن در دسترس نیست: {str(e)}'
+            }), 500
 
     except Exception as e:
         return jsonify({
@@ -371,22 +345,8 @@ def geoip_lookup(ip):
         location = geoip.lookup_ip(ip)
 
         return jsonify(location)
-    except ImportError:
-        # شبیه‌سازی مکان‌یابی
-        import random
-
-        mock_location = {
-            'ip': ip,
-            'country': 'ایران',
-            'province': 'ایلام',
-            'city': 'ایلام',
-            'latitude': 33.6374 + (random.random() - 0.5) * 0.01,
-            'longitude': 46.4227 + (random.random() - 0.5) * 0.01,
-            'isp': 'مخابرات ایران',
-            'confidence': random.uniform(0.7, 0.95)
-        }
-
-        return jsonify(mock_location)
+        except ImportError:
+        return jsonify({'error': 'ماژول مکان‌یابی در دسترس نیست'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -413,21 +373,11 @@ def start_rf_scan():
             'message': 'اسکن RF شروع شد',
             'duration': duration
         })
-    except ImportError:
-        # شبیه‌سازی اسکن RF
-        import random
-
-        mock_results = {
-            'detected_signals': random.randint(0, 5),
-            'suspicious_frequencies': random.randint(0, 3),
-            'mining_signatures': random.randint(0, 2)
-        }
-
+        except ImportError:
         return jsonify({
-            'status': 'success',
-            'message': 'اسکن RF شبیه‌سازی شده کامل شد',
-            'results': mock_results
-        })
+            'status': 'error',
+            'message': 'ماژول اسکن RF در دسترس نیس��'
+        }), 500
     except Exception as e:
         return jsonify({
             'status': 'error',
@@ -452,25 +402,8 @@ def ai_analyze():
         analysis = analyzer.analyze_network_pattern(network_data)
 
         return jsonify(analysis)
-    except ImportError:
-        # شبیه‌سازی تحلیل هوش مصنوعی
-        import random
-
-        mock_analysis = {
-            'analysis_type': 'network_pattern',
-            'ai_analysis': {
-                'anomaly_score': random.uniform(-1, 1),
-                'is_anomaly': random.choice([True, False]),
-                'miner_probability': random.uniform(0, 1),
-                'confidence_level': random.choice(['بالا', 'متوسط', 'پایین'])
-            },
-            'recommendations': [
-                'ادامه مانیتورینگ',
-                'بررسی دقیق‌تر'
-            ]
-        }
-
-        return jsonify(mock_analysis)
+        except ImportError:
+        return jsonify({'error': 'ماژول تحلیل هوش مصنوعی در دسترس نیست'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
