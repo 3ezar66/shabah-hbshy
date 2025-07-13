@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}شبح حبشی{% endblock %}</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Vazir:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-color: #667eea;
+        --secondary-color: #764ba2;
+        --accent-color: #f093fb;
+        --dark-color: #2d3748;
+        --light-color: #f7fafc;
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 12px 40px rgba(0, 0, 0, 0.15);
+        --shadow-strong: 0 16px 48px rgba(0, 0, 0, 0.2);
+        --border-radius: 12px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Vazir", sans-serif;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color) 0%,
+          var(--secondary-color) 100%
+        );
+        color: var(--dark-color);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* پوسته اصلی گلاس مورفیزم */
+      .main-container {
+        margin: 16px;
+        height: calc(100vh - 32px);
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-strong);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* نو��ر عنوان مدرن */
+      .modern-header {
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.2) 0%,
+          rgba(255, 255, 255, 0.1) 100%
+        );
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--glass-border);
+        padding: 12px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .header-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: white;
+        font-weight: 600;
+        font-size: 16px;
+      }
+
+      .app-icon {
+        width: 24px;
+        height: 24px;
+        background: linear-gradient(
+          45deg,
+          var(--accent-color),
+          var(--primary-color)
+        );
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-soft);
+        transform-style: preserve-3d;
+      }
+
+      .app-icon::before {
+        content: "👻";
+        font-size: 14px;
+        transform: translateZ(4px);
+      }
+
+      .window-controls {
+        display: flex;
+        gap: 8px;
+      }
+
+      .control-button {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+        transform-style: preserve-3d;
+      }
+
+      .control-button:hover {
+        transform: translateZ(2px) scale(1.1);
+      }
+
+      .control-close {
+        background: #ff5f56;
+      }
+      .control-minimize {
+        background: #ffbd2e;
+      }
+      .control-maximize {
+        background: #27ca3f;
+      }
+
+      /* ناوبری مدرن */
+      .modern-nav {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(15px);
+        border-bottom: 1px solid var(--glass-border);
+        padding: 8px 20px;
+        display: flex;
+        gap: 4px;
+        overflow-x: auto;
+      }
+
+      .nav-item {
+        padding: 8px 16px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: var(--transition);
+        white-space: nowrap;
+        position: relative;
+        transform-style: preserve-3d;
+      }
+
+      .nav-item:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px) translateZ(4px);
+        box-shadow: var(--shadow-medium);
+      }
+
+      .nav-item.active {
+        background: linear-gradient(
+          45deg,
+          var(--accent-color),
+          var(--primary-color)
+        );
+        transform: translateZ(6px);
+        box-shadow: var(--shadow-strong);
+      }
+
+      .nav-item::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          45deg,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        border-radius: 8px;
+        opacity: 0;
+        transition: var(--transition);
+      }
+
+      .nav-item:hover::before {
+        opacity: 1;
+      }
+
+      /* منطقه محتوا */
+      .content-wrapper {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+      }
+
+      /* ساید بار مدرن */
+      .modern-sidebar {
+        width: 280px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(15px);
+        border-left: 1px solid var(--glass-border);
+        padding: 20px;
+        overflow-y: auto;
+        transform-style: preserve-3d;
+      }
+
+      .sidebar-section {
+        margin-bottom: 24px;
+      }
+
+      .section-title {
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        opacity: 0.9;
+      }
+
+      .modern-card {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--border-radius);
+        padding: 16px;
+        margin-bottom: 12px;
+        transition: var(--transition);
+        transform-style: preserve-3d;
+      }
+
+      .modern-card:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-4px) translateZ(8px);
+        box-shadow: var(--shadow-strong);
+      }
+
+      /* محتوای اصلی */
+      .main-content {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.05);
+        margin: 12px;
+        border-radius: var(--border-radius);
+        padding: 24px;
+        overflow: auto;
+        backdrop-filter: blur(5px);
+      }
+
+      /* دکمه‌های مدر�� */
+      .modern-button {
+        background: linear-gradient(
+          45deg,
+          var(--accent-color),
+          var(--primary-color)
+        );
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        transform-style: preserve-3d;
+      }
+
+      .modern-button:hover {
+        transform: translateY(-2px) translateZ(4px);
+        box-shadow: var(--shadow-strong);
+      }
+
+      .modern-button:active {
+        transform: translateY(0) translateZ(2px);
+      }
+
+      .modern-button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .modern-button:hover::before {
+        left: 100%;
+      }
+
+      /* فرم‌های مدرن */
+      .modern-input {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        padding: 12px 16px;
+        color: white;
+        font-size: 14px;
+        width: 100%;
+        transition: var(--transition);
+      }
+
+      .modern-input::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      .modern-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(240, 147, 251, 0.3);
+        transform: translateZ(4px);
+      }
+
+      /* پنل‌های اطلاعات */
+      .info-panel {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--border-radius);
+        padding: 20px;
+        margin-bottom: 16px;
+        position: relative;
+        transform-style: preserve-3d;
+      }
+
+      .info-panel::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          var(--accent-color),
+          var(--primary-color)
+        );
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+      }
+
+      .panel-header {
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .panel-icon {
+        width: 20px;
+        height: 20px;
+        background: linear-gradient(
+          45deg,
+          var(--accent-color),
+          var(--primary-color)
+        );
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        transform-style: preserve-3d;
+      }
+
+      /* نوار وضعیت مدرن */
+      .modern-status-bar {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid var(--glass-border);
+        padding: 8px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .status-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .status-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #27ca3f;
+        box-shadow: 0 0 8px rgba(39, 202, 63, 0.5);
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      /* جدول مدرن */
+      .modern-table {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .modern-table th {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 12px 16px;
+        font-weight: 600;
+        text-align: right;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .modern-table td {
+        padding: 12px 16px;
+        color: rgba(255, 255, 255, 0.9);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .modern-table tr:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      /* انیمیشن‌های مدرن */
+      .fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .slide-in {
+        animation: slideIn 0.4s ease-out forwards;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(-20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      /* ریسپانسیو */
+      @media (max-width: 768px) {
+        .main-container {
+          margin: 8px;
+          height: calc(100vh - 16px);
+        }
+
+        .modern-sidebar {
+          width: 240px;
+        }
+
+        .content-wrapper {
+          flex-direction: column;
+        }
+
+        .modern-nav {
+          overflow-x: scroll;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        .modern-nav::-webkit-scrollbar {
+          display: none;
+        }
+      }
+
+      /* اسکرول بار مخفی */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+      }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    <div class="main-container fade-in">
+      <!-- نوار عنوان مدرن -->
+      <div class="modern-header">
+        <div class="header-title">
+          <div class="app-icon"></div>
+          <span>{% block window_title %}شبح حبشی{% endblock %}</span>
+        </div>
+        <div class="window-controls">
+          <button
+            class="control-button control-close"
+            onclick="closeApp()"
+          ></button>
+          <button
+            class="control-button control-minimize"
+            onclick="minimizeApp()"
+          ></button>
+          <button
+            class="control-button control-maximize"
+            onclick="maximizeApp()"
+          ></button>
+        </div>
+      </div>
+
+      <!-- ناوبری مدرن -->
+      <nav class="modern-nav">
+        <a href="/" class="nav-item">🏠 خانه</a>
+        <a href="/dashboard" class="nav-item">📊 داشبورد</a>
+        <a href="/scanner" class="nav-item">🔍 اسکن زنده</a>
+        <a href="/map" class="nav-item">🗺️ نقشه</a>
+        <a href="/scan_history" class="nav-item">📋 تاریخچه</a>
+        <a href="/about" class="nav-item">ℹ️ درباره</a>
+      </nav>
+
+      <!-- محتوای اصلی -->
+      <div class="content-wrapper">
+        <!-- ساید بار -->
+        <div class="modern-sidebar slide-in">
+          {% block sidebar %}
+          <div class="sidebar-section">
+            <h3 class="section-title">🎯 عملیات سریع</h3>
+            <div class="modern-card">
+              <button
+                class="modern-button"
+                onclick="startQuickScan()"
+                style="width: 100%"
+              >
+                🚀 اسکن سریع
+              </button>
+            </div>
+          </div>
+
+          <div class="sidebar-section">
+            <h3 class="section-title">📊 وضعیت سیستم</h3>
+            <div class="modern-card">
+              <div
+                style="
+                  color: rgba(255, 255, 255, 0.9);
+                  font-size: 14px;
+                  line-height: 1.6;
+                "
+              >
+                <div>وضعیت: <span style="color: #27ca3f">آنلاین</span></div>
+                <div>آخرین اسکن: <span id="last-scan-time">-</span></div>
+                <div>ماینرهای یافت شده: <span id="total-miners">0</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sidebar-section">
+            <h3 class="section-title">🔧 تنظیمات</h3>
+            <div class="modern-card">
+              <input
+                type="text"
+                class="modern-input"
+                placeholder="محدوده IP..."
+                id="ip-range-input"
+                style="margin-bottom: 8px"
+              />
+              <button
+                class="modern-button"
+                onclick="customScan()"
+                style="width: 100%"
+              >
+                اسکن سفارشی
+              </button>
+            </div>
+          </div>
+          {% endblock %}
+        </div>
+
+        <!-- محتوای اصلی -->
+        <main class="main-content">
+          {% block content %}
+          <div class="info-panel">
+            <div class="panel-header">
+              <div class="panel-icon">👻</div>
+              خوش آمدید به شبح حبشی
+            </div>
+            <p style="color: rgba(255, 255, 255, 0.9); line-height: 1.6">
+              سیستم پیشرفته تشخیص و مانیتورینگ ماینرهای رمزارز
+            </p>
+          </div>
+          {% endblock %}
+        </main>
+      </div>
+
+      <!-- نوار وضعیت مدرن -->
+      <div class="modern-status-bar">
+        <div class="status-item">
+          <div class="status-indicator"></div>
+          <span>سیستم فعال</span>
+        </div>
+        <div class="status-item">
+          <span id="current-time"></span>
+        </div>
+        <div class="status-item">
+          <span>طراح: عرفان رجبی</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // تنظیم نوار ناوبری فعال
+      document.addEventListener("DOMContentLoaded", function () {
+        const currentPath = window.location.pathname;
+        const navItems = document.querySelectorAll(".nav-item");
+
+        navItems.forEach((item) => {
+          if (item.getAttribute("href") === currentPath) {
+            item.classList.add("active");
+          }
+        });
+
+        // به‌روزرسانی ساعت
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // تنظیم انیمیشن‌های ورود
+        const cards = document.querySelectorAll(".modern-card");
+        cards.forEach((card, index) => {
+          setTimeout(() => {
+            card.classList.add("fade-in");
+          }, index * 100);
+        });
+      });
+
+      function updateClock() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString("fa-IR");
+        const element = document.getElementById("current-time");
+        if (element) {
+          element.textContent = timeStr;
+        }
+      }
+
+      function closeApp() {
+        if (confirm("آیا مطمئن هستید که می‌خواهید برنامه را ببندید؟")) {
+          window.close();
+        }
+      }
+
+      function minimizeApp() {
+        // شبیه‌سازی کمینه کردن
+        document.querySelector(".main-container").style.transform =
+          "scale(0.9)";
+        setTimeout(() => {
+          document.querySelector(".main-container").style.transform =
+            "scale(1)";
+        }, 200);
+      }
+
+      function maximizeApp() {
+        const container = document.querySelector(".main-container");
+        if (container.style.margin === "0px") {
+          container.style.margin = "16px";
+          container.style.height = "calc(100vh - 32px)";
+        } else {
+          container.style.margin = "0px";
+          container.style.height = "100vh";
+        }
+      }
+
+      function startQuickScan() {
+        window.location.href = "/scanner";
+      }
+
+      function customScan() {
+        const ipRange = document.getElementById("ip-range-input").value;
+        if (ipRange) {
+          window.location.href = `/scanner?target=${encodeURIComponent(ipRange)}`;
+        } else {
+          alert("لطفاً محدوده IP را وارد کنید");
+        }
+      }
+
+      // به‌روزرسانی آمار ساید بار
+      function updateSidebarStats() {
+        // فقط اگر element ها وجود داشته باشند
+        const lastScanElement = document.getElementById("last-scan-time");
+        const totalMinersElement = document.getElementById("total-miners");
+
+        if (lastScanElement) {
+          lastScanElement.textContent = new Date().toLocaleTimeString("fa-IR");
+        }
+      }
+
+      // به‌رو��رسانی هر 30 ثانیه
+      setInterval(updateSidebarStats, 30000);
+    </script>
+
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>
