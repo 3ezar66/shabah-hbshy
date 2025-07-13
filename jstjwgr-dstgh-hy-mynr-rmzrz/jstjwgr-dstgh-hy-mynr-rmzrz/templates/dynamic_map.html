@@ -1,4 +1,4 @@
-{% extends "shell_unified.html" %} {% block title %}نقشه واقعی و مکان‌یابی{%
+{% extends "shell_modern.html" %} {% block title %}نقشه واقعی و مکان‌یابی{%
 endblock %} {% block window_title %}نقشه واقعی پویا - مکان‌یابی ماینرها{%
 endblock %} {% block extra_css %}
 <link
@@ -222,7 +222,7 @@ endblock %} {% block extra_css %}
   <div class="map-main">
     <!-- کنترل‌های نقشه -->
     <div class="map-controls">
-      <div class="panel-header">🗺️ کنترل نقشه</div>
+      <div class="panel-header">��️ کنترل نقشه</div>
 
       <div class="control-row">
         <label>مکان:</label>
@@ -401,7 +401,7 @@ endblock %} {% block extra_css %}
     mehran: { lat: 33.1222, lng: 46.1644, name: "مهران" },
     malekshahi: { lat: 33.2584, lng: 46.9309, name: "ملکشاهی" },
     sirvan: { lat: 33.8567, lng: 46.0789, name: "سرابله" },
-    chardavol: { lat: 33.2888, lng: 46.7031, name: "چرداول" },
+    chardavol: { lat: 33.2888, lng: 46.7031, name: "چردا��ل" },
   };
 
   // راه‌اندازی نقشه
@@ -603,7 +603,7 @@ endblock %} {% block extra_css %}
     const ip = document.getElementById("ip-search").value.trim();
 
     if (!isValidIP(ip)) {
-      alert("آدرس IP نامعتبر است");
+      alert("آدرس IP نا��عتبر است");
       return;
     }
 

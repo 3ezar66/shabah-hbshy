@@ -1,4 +1,4 @@
-{% extends "shell_unified.html" %} {% block title %}تاریخچه اسکن‌ها - سیستم
+{% extends "shell_modern.html" %} {% block title %}تاریخچه اسکن‌ها - سیستم
 شناسایی ماینر{% endblock %} {% block content %}
 <div class="panel">
   <div class="panel-header">
@@ -490,7 +490,7 @@
     }
 
     if (
-      confirm(`آیا می‌خواهید ${selected.length} اسکن انتخاب شده را حذف کنید؟`)
+      confirm(`آیا می‌خ��اهید ${selected.length} اسکن انتخاب شده را حذف کنید؟`)
     ) {
       // Implementation for deletion
       showAlert(`${selected.length} اسکن حذف شد`, "success");

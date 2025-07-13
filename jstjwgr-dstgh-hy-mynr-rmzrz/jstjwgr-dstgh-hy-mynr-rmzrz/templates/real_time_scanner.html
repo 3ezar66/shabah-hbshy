@@ -1,4 +1,4 @@
-{% extends "shell_unified.html" %} {% block title %}اسکن شبکه زنده - استان
+{% extends "shell_modern.html" %} {% block title %}اسکن شبکه زنده - استان
 ایلام{% endblock %} {% block window_title %}اسکن شبکه زنده و تشخیص ماینر{%
 endblock %} {% block extra_css %}
 <style>
@@ -284,7 +284,7 @@ endblock %} {% block extra_css %}
 <div class="scanner-main">
   <!-- بخش اصلی اسکن -->
   <div class="scanner-left">
-    <!-- کنترل‌های اسکن -->
+    <!-- کنترل��های اسکن -->
     <div class="scan-controls">
       <div class="panel-header">🔧 تنظیمات اسکن</div>
 
@@ -321,7 +321,7 @@ endblock %} {% block extra_css %}
       <div class="control-row">
         <label>سرعت:</label>
         <select id="scan-speed">
-          <option value="slow">آهسته (دقیق)</option>
+          <option value="slow">آهست�� (دقیق)</option>
           <option value="normal" selected>معمولی</option>
           <option value="fast">سریع</option>
           <option value="aggressive">تهاجمی</option>
@@ -669,7 +669,7 @@ endblock %} {% block extra_css %}
   }
 
   function getIPsFromLocation(location) {
-    // شبیه‌سازی دریافت IP از مکان
+    // شبی��‌سازی دریافت IP از مکان
     // در واقعیت از API مکان‌یابی استفاده می‌شود
     const locationIPs = {
       ایلام: [
@@ -858,7 +858,7 @@ endblock %} {% block extra_css %}
   function processScanResult(ip, port, result) {
     const timestamp = new Date().toLocaleTimeString("fa-IR");
 
-    // ذخیره نتیجه
+    // ذخی��ه نتیجه
     scanData.results.push(result);
     scanData.scanLogs.push({
       timestamp: timestamp,
@@ -1191,7 +1191,7 @@ endblock %} {% block extra_css %}
     report += `هدف: ${document.getElementById("scan-target-value").value}\n`;
     report += `پورت‌ها: ${scanData.ports.join(", ")}\n\n`;
 
-    report += "📊 ��مار کلی:\n";
+    report += "📊 آمار کلی:\n";
     report += `   • IP های اسکن شده: ${scanData.stats.scannedIPs}\n`;
     report += `   • پورت‌های باز: ${scanData.stats.openPorts}\n`;
     report += `   • هاست‌های فعال: ${scanData.stats.activeHosts}\n`;
