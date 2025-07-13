@@ -104,9 +104,9 @@ def login():
             
             return redirect(url_for('dashboard'))
         else:
-            return render_template('login_classic.html', error_message='نام کاربری یا رمز عبور اشتباه است')
+            return render_template('login_modern.html', error_message='نام کاربری یا رمز عبور اشتباه است')
     
-    return render_template('login_classic.html')
+    return render_template('login_modern.html')
 
 @app.route('/dashboard')
 def dashboard():
@@ -416,7 +416,7 @@ def get_provinces():
         {'code': 'ilam', 'name': 'ایلام', 'capital': 'ایلام'},
         {'code': 'tehran', 'name': 'تهران', 'capital': 'تهران'},
         {'code': 'isfahan', 'name': 'اصفهان', 'capital': 'اصفهان'},
-        {'code': 'shiraz', 'name': 'فارس', 'capital': 'شیراز'},
+        {'code': 'shiraz', 'name': 'فارس', 'capital': 'شی��از'},
         {'code': 'tabriz', 'name': 'آذربایجان شرقی', 'capital': 'تبریز'},
         {'code': 'mashhad', 'name': 'خراسان رضوی', 'capital': 'مشهد'}
     ]
@@ -491,7 +491,7 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
-# ایجاد جداول دیتابیس
+# ایجاد جداول دی��ابیس
 with app.app_context():
     db.create_all()
     
