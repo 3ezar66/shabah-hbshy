@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-��یستم ��امع شناسایی و نظارت بر ماینرهای رمزارز
+سیستم جامع شناسایی و نظارت بر ماینرهای رمزارز
 نرم‌افزار حرفه‌ای چندکاربره با رابط وب و بانک اطلاعاتی
 """
 
@@ -129,82 +129,6 @@ def dashboard():
                          recent_scans=recent_scans,
                          threat_stats=threat_stats)
 
-@app.route('/scan', methods=['GET', 'POST'])
-def scan():
-    ensure_logged_in()
-    
-    if request.method == 'POST':
-        scan_type = request.form['scan_type']
-        target_range = request.form['target_range']
-        
-        # ایجاد session جدید اسکن
-        session_id = str(uuid.uuid4())
-        scan_session = ScanSession(
-            session_id=session_id,
-            user_id=session['user_id'],
-            scan_type=scan_type,
-            target_range=target_range
-        )
-        
-        db.session.add(scan_session)
-        db.session.commit()
-        
-        return redirect(url_for('scan_progress', session_id=session_id))
-    
-    return render_template('scan.html')
-
-@app.route('/scan_progress/<session_id>')
-def scan_progress(session_id):
-    ensure_logged_in()
-    
-    scan_session = ScanSession.query.filter_by(session_id=session_id, user_id=session['user_id']).first()
-    if not scan_session:
-        return redirect(url_for('scan'))
-    
-    return render_template('scan_progress.html', scan_session=scan_session)
-
-@app.route('/scan_history')
-def scan_history():
-    ensure_logged_in()
-    return render_template('scan_history.html')
-
-@app.route('/miners')
-def miners():
-    ensure_logged_in()
-    
-    page = request.args.get('page', 1, type=int)
-    per_page = 20
-    
-    miners = DetectedMiner.query.filter_by(user_id=session['user_id']).order_by(
-        DetectedMiner.detection_time.desc()
-    ).paginate(page=page, per_page=per_page, error_out=False)
-    
-    return render_template('miners.html', miners=miners)
-
-@app.route('/reports')
-def reports():
-    ensure_logged_in()
-    
-    # آمار کلی
-    total_miners = DetectedMiner.query.filter_by(user_id=session['user_id']).count()
-    
-    # آمار بر اساس سطح تهدید
-    threat_stats = db.session.query(
-        DetectedMiner.threat_level,
-        db.func.count(DetectedMiner.id).label('count')
-    ).filter_by(user_id=session['user_id']).group_by(DetectedMiner.threat_level).all()
-    
-    return render_template('reports.html',
-                         total_miners=total_miners,
-                         threat_stats=threat_stats,
-                         daily_stats=[],
-                         port_stats={})
-
-@app.route('/about')
-def about():
-    ensure_logged_in()
-    return render_template('about.html')
-
 @app.route('/scanner')
 def real_time_scanner():
     """صفحه اسکن زنده و واقعی"""
@@ -217,17 +141,27 @@ def dynamic_map():
     ensure_logged_in()
     return render_template('dynamic_map.html')
 
+@app.route('/scan_history')
+def scan_history():
+    ensure_logged_in()
+    return render_template('scan_history.html')
+
+@app.route('/about')
+def about():
+    ensure_logged_in()
+    return render_template('about.html')
+
 @app.route('/api/scan/start', methods=['POST'])
 def start_scan():
-    """API شروع اسکن واقعی"""
+    """API شروع اسکن واقع��"""
     ensure_logged_in()
-
+    
     try:
         data = request.json or {}
         target = data.get('target', '192.168.1.0/24')
         ports = data.get('ports', [22, 80, 443, 3333, 4444])
         scan_type = data.get('scan_type', 'network')
-
+        
         # ایجاد session اسکن
         session_id = str(uuid.uuid4())
         scan_session = ScanSession(
@@ -237,20 +171,20 @@ def start_scan():
             target_range=target,
             status='running'
         )
-
+        
         db.session.add(scan_session)
         db.session.commit()
-
+        
         # اجرای اسکن واقعی
         try:
             import sys
             import os
             sys.path.append(os.path.dirname(__file__))
-
+            
             from modules.network.scanner import NetworkScanner
             scanner = NetworkScanner()
             results = scanner.comprehensive_scan(target)
-
+            
             # به‌روزرسانی session
             scan_session.status = 'completed'
             scan_session.end_time = datetime.utcnow()
@@ -258,9 +192,9 @@ def start_scan():
             scan_session.detected_miners = results.get('summary', {}).get('confirmed_miners', 0)
             scan_session.results = str(results)
             scan_session.progress = 100
-
+            
             db.session.commit()
-
+            
             # ذخیره ماینرهای شناسایی شده
             for ip, host_data in results.get('scanned_hosts', {}).items():
                 if host_data.get('risk_level') in ['confirmed', 'potential']:
@@ -276,27 +210,27 @@ def start_scan():
                         user_id=session['user_id']
                     )
                     db.session.add(miner)
-
+            
             db.session.commit()
-
+            
             return jsonify({
                 'status': 'success',
                 'scan_id': session_id,
                 'message': 'اسکن با موفقیت کامل شد',
                 'results': results
-                        })
-
+            })
+            
         except ImportError as e:
             # اعلام خطا در صورت عدم دسترسی به ماژول
             scan_session.status = 'failed'
             scan_session.end_time = datetime.utcnow()
             db.session.commit()
-
+            
             return jsonify({
                 'status': 'error',
                 'message': f'ماژول اسکن در دسترس نیست: {str(e)}'
             }), 500
-
+            
     except Exception as e:
         return jsonify({
             'status': 'error',
@@ -307,13 +241,13 @@ def start_scan():
 def get_scan_results(scan_id):
     """دریافت نتایج اسکن"""
     ensure_logged_in()
-
+    
     try:
         scan_session = ScanSession.query.filter_by(
-            session_id=scan_id,
+            session_id=scan_id, 
             user_id=session['user_id']
         ).first()
-
+        
         if scan_session:
             return jsonify({
                 'session_id': scan_session.session_id,
@@ -334,16 +268,16 @@ def get_scan_results(scan_id):
 def geoip_lookup(ip):
     """مکان‌یابی آدرس IP"""
     ensure_logged_in()
-
+    
     try:
         import sys
         import os
         sys.path.append(os.path.dirname(__file__))
-
+        
         from modules.geolocation.iran_geoip import IranGeoIP
         geoip = IranGeoIP()
         location = geoip.lookup_ip(ip)
-
+        
         return jsonify(location)
     except ImportError:
         return jsonify({'error': 'ماژول مکان‌یابی در دسترس نیست'}), 500
@@ -354,25 +288,25 @@ def geoip_lookup(ip):
 def start_rf_scan():
     """شروع اسکن RF و مغناطیسی"""
     ensure_logged_in()
-
+    
     try:
         import sys
         import os
         sys.path.append(os.path.dirname(__file__))
-
+        
         data = request.json or {}
         area = data.get('area', 'local')
         duration = data.get('duration', 300)
-
+        
         from modules.detection.rf_detector import RFDetector
         detector = RFDetector()
         detector.start_rf_monitoring(area, duration)
-
+        
         return jsonify({
             'status': 'success',
             'message': 'اسکن RF شروع شد',
             'duration': duration
-                })
+        })
     except ImportError:
         return jsonify({
             'status': 'error',
@@ -388,19 +322,19 @@ def start_rf_scan():
 def ai_analyze():
     """تحلیل هوش مصنوعی"""
     ensure_logged_in()
-
+    
     try:
         import sys
         import os
         sys.path.append(os.path.dirname(__file__))
-
+        
         data = request.json or {}
         network_data = data.get('network_data', {})
-
-                from modules.ai.free_ai_models import FreeAIAnalyzer
+        
+        from modules.ai.free_ai_models import FreeAIAnalyzer
         analyzer = FreeAIAnalyzer()
         analysis = analyzer.analyze_network_pattern(network_data)
-
+        
         return jsonify(analysis)
     except ImportError:
         return jsonify({'error': 'ماژول تحلیل هوش مصنوعی در دسترس نیست'}), 500
@@ -411,32 +345,32 @@ def ai_analyze():
 def get_provinces():
     """دریافت لیست استان‌های ایران"""
     ensure_logged_in()
-
+    
     provinces = [
         {'code': 'ilam', 'name': 'ایلام', 'capital': 'ایلام'},
         {'code': 'tehran', 'name': 'تهران', 'capital': 'تهران'},
         {'code': 'isfahan', 'name': 'اصفهان', 'capital': 'اصفهان'},
-        {'code': 'shiraz', 'name': 'فارس', 'capital': 'شی��از'},
+        {'code': 'shiraz', 'name': 'فارس', 'capital': 'شیراز'},
         {'code': 'tabriz', 'name': 'آذربایجان شرقی', 'capital': 'تبریز'},
         {'code': 'mashhad', 'name': 'خراسان رضوی', 'capital': 'مشهد'}
     ]
-
+    
     return jsonify(provinces)
 
 @app.route('/api/cities/<province_code>')
 def get_cities(province_code):
     """دریافت شهرهای یک استان"""
     ensure_logged_in()
-
+    
     cities_data = {
         'ilam': ['ایلام', 'ایوان', 'دره‌شهر', 'دهلران', 'آبدانان', 'مهران', 'ملکشاهی', 'سرابله', 'چرداول'],
         'tehran': ['تهران', 'کرج', 'ری', 'شهریار', 'ورامین'],
-        'isfahan': ['ا��فهان', 'کاشان', 'نجف‌آباد', 'خمینی‌شهر', 'شاهین‌شهر'],
+        'isfahan': ['اصفهان', 'کاشان', 'نجف‌آباد', 'خمینی‌شهر', 'شاهین‌شهر'],
         'shiraz': ['شیراز', 'کازرون', 'مرودشت', 'جهرم', 'لار'],
         'tabriz': ['تبریز', 'مراغه', 'اهر', 'بناب', 'میانه'],
-        'mashhad': ['مشهد', 'نیشابو��', 'سبزوار', 'کاشمر', 'گناباد']
+        'mashhad': ['مشهد', 'نیشابور', 'سبزوار', 'کاشمر', 'گناباد']
     }
-
+    
     cities = cities_data.get(province_code, [])
     return jsonify(cities)
 
@@ -466,7 +400,6 @@ def api_scan_sessions():
 def system_metrics():
     ensure_logged_in()
     
-    # Mock data for now
     return jsonify({
         'cpu_usage': 45.2,
         'memory_usage': 62.1,
@@ -475,23 +408,12 @@ def system_metrics():
         'active_connections': 15
     })
 
-@app.route('/api/live_monitor')
-def live_monitor():
-    ensure_logged_in()
-    
-    # Mock data for now
-    return jsonify({
-        'suspicious_processes': [],
-        'network_connections': [],
-        'timestamp': datetime.utcnow().isoformat()
-    })
-
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('index'))
 
-# ایجاد جداول دی��ابیس
+# ایجاد جداول دیتابیس
 with app.app_context():
     db.create_all()
     
