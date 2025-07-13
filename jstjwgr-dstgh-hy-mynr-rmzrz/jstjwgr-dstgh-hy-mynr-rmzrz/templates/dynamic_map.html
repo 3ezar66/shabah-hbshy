@@ -1,0 +1,1027 @@
+{% extends "shell_unified.html" %} {% block title %}نقشه واقعی و مکان‌یابی{%
+endblock %} {% block window_title %}نقشه واقعی پویا - مکان‌یابی ماینرها{%
+endblock %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<style>
+  .map-container {
+    display: flex;
+    gap: 12px;
+    height: 100%;
+  }
+
+  .map-main {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .map-controls {
+    background: #f0f0f0;
+    border: 2px inset #c0c0c0;
+    padding: 8px;
+    height: 120px;
+  }
+
+  .map-display {
+    flex: 1;
+    border: 2px inset #c0c0c0;
+    position: relative;
+    min-height: 400px;
+  }
+
+  .map-sidebar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #map {
+    width: 100%;
+    height: 100%;
+    background: #f0f0f0;
+  }
+
+  .location-info {
+    background: #f0f0f0;
+    border: 2px inset #c0c0c0;
+    padding: 8px;
+    height: 150px;
+    overflow-y: auto;
+  }
+
+  .ip-details {
+    background: #f0f0f0;
+    border: 2px inset #c0c0c0;
+    padding: 8px;
+    height: 200px;
+    overflow-y: auto;
+  }
+
+  .detected-locations {
+    background: #fff0f0;
+    border: 2px inset #c0c0c0;
+    padding: 8px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .control-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 4px 0;
+  }
+
+  .control-row label {
+    min-width: 60px;
+    font-size: 11px;
+    font-weight: bold;
+  }
+
+  .control-row input,
+  .control-row select {
+    flex: 1;
+    padding: 2px 4px;
+    border: 1px inset #c0c0c0;
+    font-size: 10px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 2px 0;
+    font-size: 10px;
+  }
+
+  .info-label {
+    font-weight: bold;
+  }
+
+  .info-value {
+    color: #0000ff;
+    font-family: monospace;
+  }
+
+  .location-item {
+    background: #ffeeee;
+    border: 1px solid #cc0000;
+    padding: 4px;
+    margin: 2px 0;
+    font-size: 10px;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+
+  .location-item:hover {
+    background: #ffdddd;
+  }
+
+  .location-coords {
+    color: #666;
+    font-family: monospace;
+  }
+
+  .location-details {
+    margin-top: 2px;
+    font-size: 9px;
+  }
+
+  .map-legend {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #999;
+    padding: 8px;
+    font-size: 10px;
+    z-index: 1000;
+    border-radius: 4px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 2px 0;
+  }
+
+  .legend-icon {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid #000;
+  }
+
+  .legend-normal {
+    background: #00ff00;
+  }
+  .legend-suspicious {
+    background: #ffaa00;
+  }
+  .legend-miner {
+    background: #ff0000;
+  }
+  .legend-scanning {
+    background: #0088ff;
+  }
+
+  .coordinates-display {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 8px;
+    font-family: monospace;
+    font-size: 10px;
+    border-radius: 4px;
+    z-index: 1000;
+  }
+
+  .custom-popup {
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+  .popup-title {
+    font-weight: bold;
+    color: #cc0000;
+    margin-bottom: 4px;
+  }
+
+  .popup-details {
+    margin: 2px 0;
+  }
+
+  .popup-action {
+    margin-top: 6px;
+    text-align: center;
+  }
+
+  .popup-btn {
+    background: #c0c0c0;
+    border: 1px outset #c0c0c0;
+    padding: 2px 8px;
+    font-size: 9px;
+    cursor: pointer;
+    margin: 0 2px;
+  }
+
+  .popup-btn:hover {
+    background: #d0d0d0;
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="map-container">
+  <!-- نقشه اصلی -->
+  <div class="map-main">
+    <!-- کنترل‌های نقشه -->
+    <div class="map-controls">
+      <div class="panel-header">🗺️ کنترل نقشه</div>
+
+      <div class="control-row">
+        <label>مکان:</label>
+        <select id="location-select" onchange="centerMapOnLocation()">
+          <option value="ilam">استان ایلام</option>
+          <option value="tehran">تهران</option>
+          <option value="isfahan">اصفهان</option>
+          <option value="custom">مختصات دستی</option>
+        </select>
+        <button class="btn" onclick="refreshMap()">🔄</button>
+      </div>
+
+      <div class="control-row">
+        <label>IP جستجو:</label>
+        <input
+          type="text"
+          id="ip-search"
+          placeholder="192.168.1.1"
+          onkeypress="handleIPSearch(event)"
+        />
+        <button class="btn" onclick="searchIPLocation()">🔍</button>
+      </div>
+
+      <div class="control-row">
+        <label>نوع:</label>
+        <select id="display-filter" onchange="filterMapMarkers()">
+          <option value="all">همه</option>
+          <option value="miners">فقط ماینرها</option>
+          <option value="suspicious">مشکوک</option>
+          <option value="normal">عادی</option>
+        </select>
+        <button class="btn" onclick="exportMapData()">💾</button>
+      </div>
+    </div>
+
+    <!-- نمایش نقشه -->
+    <div class="map-display">
+      <div id="map"></div>
+
+      <!-- مختصات فعلی -->
+      <div class="coordinates-display" id="coordinates-display">
+        مختصات: 33.6374, 46.4227 (ایلام)
+      </div>
+
+      <!-- راهنمای نقشه -->
+      <div class="map-legend">
+        <div style="font-weight: bold; margin-bottom: 4px">راهنما</div>
+        <div class="legend-item">
+          <div class="legend-icon legend-normal"></div>
+          <span>عادی</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-icon legend-suspicious"></div>
+          <span>مشکوک</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-icon legend-miner"></div>
+          <span>ماینر</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-icon legend-scanning"></div>
+          <span>در حال اسکن</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- بخش کناری -->
+  <div class="map-sidebar">
+    <!-- اطلاعات مکان -->
+    <div class="location-info">
+      <div class="panel-header">📍 اطلاعات مکان</div>
+      <div id="location-details">
+        <div class="info-row">
+          <span class="info-label">استان:</span>
+          <span class="info-value" id="current-province">ایلام</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">شهر:</span>
+          <span class="info-value" id="current-city">ایلام</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">عرض جغرافیایی:</span>
+          <span class="info-value" id="current-lat">33.6374</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">طول جغرافیایی:</span>
+          <span class="info-value" id="current-lng">46.4227</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">ارتفاع:</span>
+          <span class="info-value" id="current-elevation">1337 متر</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">ISP:</span>
+          <span class="info-value" id="current-isp">مخابرات ایران</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- جزئیات IP -->
+    <div class="ip-details">
+      <div class="panel-header">🌐 جزئیات IP</div>
+      <div id="ip-info">
+        <div class="info-row">
+          <span class="info-label">آدرس IP:</span>
+          <span class="info-value" id="selected-ip">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">نوع:</span>
+          <span class="info-value" id="ip-type">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">وضعیت:</span>
+          <span class="info-value" id="ip-status">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">پورت‌های باز:</span>
+          <span class="info-value" id="ip-ports">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">فاصله:</span>
+          <span class="info-value" id="ip-distance">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">آخرین اسکن:</span>
+          <span class="info-value" id="ip-last-scan">-</span>
+        </div>
+        <div style="margin-top: 8px">
+          <button
+            class="btn"
+            onclick="scanSelectedIP()"
+            style="width: 100%; font-size: 10px"
+          >
+            🔍 اسکن مجدد
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- مکان‌های شناسایی شده -->
+    <div class="detected-locations">
+      <div class="panel-header">🚨 مکان‌های شناسایی شده</div>
+      <div id="detected-list">
+        <!-- لیست مکان‌ها به صورت پویا اضافه می‌شود -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // متغیرهای سراسری نقشه
+  let map;
+  let markersLayer;
+  let currentMarkers = [];
+  let detectedLocations = [];
+
+  // مختصات مراکز استان‌ها
+  const provinceCoordinates = {
+    ilam: { lat: 33.6374, lng: 46.4227, name: "ایلام" },
+    tehran: { lat: 35.6892, lng: 51.389, name: "تهران" },
+    isfahan: { lat: 32.6539, lng: 51.666, name: "اصفهان" },
+    shiraz: { lat: 29.5918, lng: 52.5837, name: "شیراز" },
+    tabriz: { lat: 38.0962, lng: 46.2738, name: "تبریز" },
+    mashhad: { lat: 36.2605, lng: 59.6168, name: "مشهد" },
+  };
+
+  // مختصات دقیق شهرهای ایلام
+  const ilamCities = {
+    ilam_city: { lat: 33.6374, lng: 46.4227, name: "شهر ایلام" },
+    ivan: { lat: 33.7623, lng: 46.285, name: "ایوان" },
+    darreh_shahr: { lat: 33.1445, lng: 47.3792, name: "دره‌شهر" },
+    dehloran: { lat: 32.6945, lng: 47.2671, name: "دهلران" },
+    abdanan: { lat: 32.9979, lng: 47.4166, name: "آبدانان" },
+    mehran: { lat: 33.1222, lng: 46.1644, name: "مهران" },
+    malekshahi: { lat: 33.2584, lng: 46.9309, name: "ملکشاهی" },
+    sirvan: { lat: 33.8567, lng: 46.0789, name: "سرابله" },
+    chardavol: { lat: 33.2888, lng: 46.7031, name: "چرداول" },
+  };
+
+  // راه‌اندازی نقشه
+  document.addEventListener("DOMContentLoaded", function () {
+    initializeMap();
+    loadInitialData();
+
+    // به‌روزرسانی موقعیت هر 5 ثانیه
+    setInterval(updateLocationData, 5000);
+  });
+
+  function initializeMap() {
+    // ایجاد نقشه با مرکز ایلام
+    map = L.map("map").setView([33.6374, 46.4227], 10);
+
+    // اضافه کردن لایه نقشه (OpenStreetMap)
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors",
+      maxZoom: 18,
+      minZoom: 3,
+    }).addTo(map);
+
+    // لایه مارکرها
+    markersLayer = L.layerGroup().addTo(map);
+
+    // رویدادهای نقشه
+    map.on("click", handleMapClick);
+    map.on("moveend", updateCoordinatesDisplay);
+    map.on("zoomend", updateCoordinatesDisplay);
+
+    // نمایش محدوده ایلام
+    addIlamBoundary();
+
+    // اضافه کردن مارکرهای شهرهای ایلام
+    addIlamCitiesMarkers();
+
+    console.log("🗺️ نقشه راه‌اندازی شد");
+  }
+
+  function addIlamBoundary() {
+    // محدوده تقریبی استان ایلام
+    const ilamBounds = [
+      [33.0, 46.0],
+      [34.0, 46.0],
+      [34.0, 48.0],
+      [33.0, 48.0],
+      [33.0, 46.0],
+    ];
+
+    const boundary = L.polygon(ilamBounds, {
+      color: "#ff0000",
+      weight: 2,
+      opacity: 0.6,
+      fillColor: "#ff0000",
+      fillOpacity: 0.1,
+    }).addTo(map);
+
+    boundary.bindPopup(
+      '<div class="custom-popup"><div class="popup-title">استان ایلام</div><div class="popup-details">مساحت: 20,133 کیلومتر مربع<br>جمعیت: حدود 580,000 نفر</div></div>',
+    );
+  }
+
+  function addIlamCitiesMarkers() {
+    Object.keys(ilamCities).forEach((cityKey) => {
+      const city = ilamCities[cityKey];
+
+      const marker = L.circleMarker([city.lat, city.lng], {
+        radius: 6,
+        color: "#0066cc",
+        weight: 2,
+        fillColor: "#0088ff",
+        fillOpacity: 0.7,
+      }).addTo(markersLayer);
+
+      marker.bindPopup(`
+            <div class="custom-popup">
+                <div class="popup-title">${city.name}</div>
+                <div class="popup-details">
+                    مختصات: ${city.lat.toFixed(4)}, ${city.lng.toFixed(4)}<br>
+                    وضعیت: نظارت فعال
+                </div>
+                <div class="popup-action">
+                    <button class="popup-btn" onclick="scanCityIPs('${cityKey}')">اسکن شهر</button>
+                    <button class="popup-btn" onclick="showCityDetails('${cityKey}')">جزئیات</button>
+                </div>
+            </div>
+        `);
+
+      marker.cityKey = cityKey;
+      currentMarkers.push(marker);
+    });
+  }
+
+  function centerMapOnLocation() {
+    const location = document.getElementById("location-select").value;
+
+    if (location === "custom") {
+      const lat = prompt("عرض جغرافیایی:");
+      const lng = prompt("طول جغرافیایی:");
+
+      if (lat && lng) {
+        map.setView([parseFloat(lat), parseFloat(lng)], 12);
+        updateLocationDetails(parseFloat(lat), parseFloat(lng));
+      }
+    } else if (provinceCoordinates[location]) {
+      const coords = provinceCoordinates[location];
+      map.setView([coords.lat, coords.lng], location === "ilam" ? 10 : 8);
+      updateLocationDetails(coords.lat, coords.lng, coords.name);
+    }
+  }
+
+  function handleMapClick(e) {
+    const lat = e.latlng.lat;
+    const lng = e.latlng.lng;
+
+    updateLocationDetails(lat, lng);
+
+    // شبیه‌سازی جستجوی IP در این مختصات
+    setTimeout(() => {
+      const nearbyIPs = findNearbyIPs(lat, lng);
+      displayNearbyIPs(nearbyIPs);
+    }, 500);
+  }
+
+  function updateCoordinatesDisplay() {
+    const center = map.getCenter();
+    const zoom = map.getZoom();
+
+    document.getElementById("coordinates-display").textContent =
+      `مختصات: ${center.lat.toFixed(4)}, ${center.lng.toFixed(4)} | زوم: ${zoom}`;
+  }
+
+  function updateLocationDetails(lat, lng, locationName = null) {
+    // به‌روزرسانی اطلاعات مکان
+    document.getElementById("current-lat").textContent = lat.toFixed(6);
+    document.getElementById("current-lng").textContent = lng.toFixed(6);
+
+    // تشخیص استان و شهر بر اساس مختصات
+    const locationInfo = getLocationFromCoordinates(lat, lng);
+
+    document.getElementById("current-province").textContent =
+      locationInfo.province;
+    document.getElementById("current-city").textContent = locationInfo.city;
+    document.getElementById("current-elevation").textContent =
+      locationInfo.elevation;
+    document.getElementById("current-isp").textContent = locationInfo.isp;
+  }
+
+  function getLocationFromCoordinates(lat, lng) {
+    // تشخیص مکان بر اساس مختصات
+
+    // بررسی اینکه در کدام شهر ایلام است
+    for (const [cityKey, cityData] of Object.entries(ilamCities)) {
+      const distance = calculateDistance(lat, lng, cityData.lat, cityData.lng);
+      if (distance < 20) {
+        // در شعاع 20 کیلومتری
+        return {
+          province: "ایلام",
+          city: cityData.name,
+          elevation: Math.floor(Math.random() * 500) + 1000 + " متر",
+          isp: "مخابرات ایران",
+        };
+      }
+    }
+
+    // بررسی استان‌های دیگر
+    if (lat >= 33.0 && lat <= 34.0 && lng >= 46.0 && lng <= 48.0) {
+      return {
+        province: "ایلام",
+        city: "نامشخص",
+        elevation: Math.floor(Math.random() * 500) + 1000 + " متر",
+        isp: "مخابرات ایران",
+      };
+    }
+
+    return {
+      province: "نامشخص",
+      city: "نامشخص",
+      elevation: "نامشخص",
+      isp: "نامشخص",
+    };
+  }
+
+  function calculateDistance(lat1, lng1, lat2, lng2) {
+    const R = 6371; // شعاع زمین به کیلومتر
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLng = ((lng2 - lng1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  function searchIPLocation() {
+    const ip = document.getElementById("ip-search").value.trim();
+
+    if (!isValidIP(ip)) {
+      alert("آدرس IP نامعتبر است");
+      return;
+    }
+
+    // شبیه‌سازی جستجوی مکان IP
+    const location = getIPLocation(ip);
+
+    if (location) {
+      // حرکت نقشه به مکان IP
+      map.setView([location.lat, location.lng], 15);
+
+      // اضافه کردن مارکر برای IP
+      addIPMarker(ip, location);
+
+      // نمایش جزئیات IP
+      displayIPDetails(ip, location);
+
+      console.log(
+        `📍 IP ${ip} در مختصات ${location.lat}, ${location.lng} یافت شد`,
+      );
+    } else {
+      alert("مکان IP یافت نشد");
+    }
+  }
+
+  function getIPLocation(ip) {
+    // شبیه‌سازی مکان‌یابی IP
+    // در واقعیت از API مکان‌یابی یا پایگاه داده GeoIP استفاده می‌شود
+
+    const ipRanges = {
+      213.207: {
+        lat: 33.6374,
+        lng: 46.4227,
+        city: "ایلام",
+        isp: "مخابرات ایران",
+      },
+      185.74: {
+        lat: 33.2888,
+        lng: 46.7031,
+        city: "چرداول",
+        isp: "مخابرات ایران",
+      },
+      192.168: { lat: 33.6374, lng: 46.4227, city: "شبکه محلی", isp: "محلی" },
+      "5.200": {
+        lat: 35.6892,
+        lng: 51.389,
+        city: "تهران",
+        isp: "مخابرات ایران",
+      },
+    };
+
+    for (const [range, location] of Object.entries(ipRanges)) {
+      if (ip.startsWith(range)) {
+        // اضافه کردن تغییرات تصادفی برای شبیه‌سازی دقیق‌تر
+        return {
+          lat: location.lat + (Math.random() - 0.5) * 0.01,
+          lng: location.lng + (Math.random() - 0.5) * 0.01,
+          city: location.city,
+          isp: location.isp,
+          type: Math.random() < 0.1 ? "miner" : "normal",
+        };
+      }
+    }
+
+    return null;
+  }
+
+  function addIPMarker(ip, location) {
+    // تعیین رنگ بر اساس نوع
+    const colors = {
+      normal: "#00ff00",
+      suspicious: "#ffaa00",
+      miner: "#ff0000",
+      scanning: "#0088ff",
+    };
+
+    const color = colors[location.type] || colors.normal;
+
+    const marker = L.circleMarker([location.lat, location.lng], {
+      radius: 8,
+      color: "#000",
+      weight: 1,
+      fillColor: color,
+      fillOpacity: 0.8,
+    }).addTo(markersLayer);
+
+    // محتوای popup
+    const popupContent = `
+        <div class="custom-popup">
+            <div class="popup-title">IP: ${ip}</div>
+            <div class="popup-details">
+                مکان: ${location.city}<br>
+                ISP: ${location.isp}<br>
+                نوع: ${location.type}<br>
+                مختصات: ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}
+            </div>
+            <div class="popup-action">
+                <button class="popup-btn" onclick="scanIP('${ip}')">اسکن</button>
+                <button class="popup-btn" onclick="traceIP('${ip}')">ردیابی</button>
+                <button class="popup-btn" onclick="blockIP('${ip}')">مسدود</button>
+            </div>
+        </div>
+    `;
+
+    marker.bindPopup(popupContent);
+    marker.ipAddress = ip;
+    marker.locationType = location.type;
+
+    currentMarkers.push(marker);
+
+    // اگر ماینر است، اضافه کردن به لیست
+    if (location.type === "miner") {
+      addDetectedLocation(ip, location);
+    }
+  }
+
+  function addDetectedLocation(ip, location) {
+    const detectionTime = new Date().toLocaleTimeString("fa-IR");
+
+    const detection = {
+      ip: ip,
+      location: location,
+      time: detectionTime,
+      id: Date.now(),
+    };
+
+    detectedLocations.push(detection);
+
+    // اضافه کردن به UI
+    const detectedList = document.getElementById("detected-list");
+    const item = document.createElement("div");
+    item.className = "location-item";
+    item.onclick = () => selectDetectedLocation(detection.id);
+
+    item.innerHTML = `
+        <div style="font-weight: bold; color: #cc0000;">${ip}</div>
+        <div class="location-coords">${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}</div>
+        <div class="location-details">
+            شهر: ${location.city} | ISP: ${location.isp}<br>
+            زمان: ${detectionTime}
+        </div>
+    `;
+
+    detectedList.appendChild(item);
+
+    // اسکرول به پایین
+    detectedList.scrollTop = detectedList.scrollHeight;
+
+    console.log(`🚨 ماینر جدید شناسایی شد: ${ip} در ${location.city}`);
+  }
+
+  function selectDetectedLocation(id) {
+    const detection = detectedLocations.find((d) => d.id === id);
+    if (detection) {
+      map.setView([detection.location.lat, detection.location.lng], 16);
+      displayIPDetails(detection.ip, detection.location);
+    }
+  }
+
+  function displayIPDetails(ip, location) {
+    document.getElementById("selected-ip").textContent = ip;
+    document.getElementById("ip-type").textContent = location.type;
+    document.getElementById("ip-status").textContent =
+      location.type === "miner" ? "ماینر تشخیص داده شده" : "عادی";
+
+    // شبیه‌سازی پورت‌های باز
+    const openPorts =
+      location.type === "miner"
+        ? ["3333", "4444", "22", "80"]
+        : ["22", "80", "443"];
+    document.getElementById("ip-ports").textContent = openPorts.join(", ");
+
+    // محاسبه فاصله از مرکز نقشه
+    const center = map.getCenter();
+    const distance = calculateDistance(
+      center.lat,
+      center.lng,
+      location.lat,
+      location.lng,
+    );
+    document.getElementById("ip-distance").textContent =
+      distance.toFixed(2) + " کیلومتر";
+
+    document.getElementById("ip-last-scan").textContent =
+      new Date().toLocaleTimeString("fa-IR");
+  }
+
+  function findNearbyIPs(lat, lng) {
+    // شبیه‌سازی جستجوی IP های نزدیک
+    const nearbyIPs = [];
+    const numIPs = Math.floor(Math.random() * 5) + 1;
+
+    for (let i = 0; i < numIPs; i++) {
+      const randomIP = generateRandomIP();
+      const randomOffset = (Math.random() - 0.5) * 0.005;
+
+      nearbyIPs.push({
+        ip: randomIP,
+        lat: lat + randomOffset,
+        lng: lng + randomOffset,
+        type: Math.random() < 0.2 ? "miner" : "normal",
+      });
+    }
+
+    return nearbyIPs;
+  }
+
+  function displayNearbyIPs(ips) {
+    ips.forEach((ipData) => {
+      const location = {
+        lat: ipData.lat,
+        lng: ipData.lng,
+        city: "نزدیک کلیک",
+        isp: "نامشخص",
+        type: ipData.type,
+      };
+
+      addIPMarker(ipData.ip, location);
+    });
+  }
+
+  function generateRandomIP() {
+    // تولید IP تصادفی در محدوده‌های ایرانی
+    const ranges = ["213.207", "185.74", "192.168", "5.200"];
+    const range = ranges[Math.floor(Math.random() * ranges.length)];
+
+    return `${range}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
+  }
+
+  function isValidIP(ip) {
+    const regex = /^(\d{1,3}\.){3}\d{1,3}$/;
+    if (!regex.test(ip)) return false;
+
+    const parts = ip.split(".");
+    return parts.every((part) => {
+      const num = parseInt(part);
+      return num >= 0 && num <= 255;
+    });
+  }
+
+  function filterMapMarkers() {
+    const filter = document.getElementById("display-filter").value;
+
+    currentMarkers.forEach((marker) => {
+      if (filter === "all") {
+        marker.addTo(markersLayer);
+      } else if (filter === "miners" && marker.locationType === "miner") {
+        marker.addTo(markersLayer);
+      } else if (
+        filter === "suspicious" &&
+        marker.locationType === "suspicious"
+      ) {
+        marker.addTo(markersLayer);
+      } else if (filter === "normal" && marker.locationType === "normal") {
+        marker.addTo(markersLayer);
+      } else {
+        markersLayer.removeLayer(marker);
+      }
+    });
+  }
+
+  function refreshMap() {
+    // بارگذاری مجدد داده‌ها
+    loadInitialData();
+    console.log("🔄 نقشه به‌روزرسانی شد");
+  }
+
+  function loadInitialData() {
+    // شبیه‌سازی بارگذاری داده‌های اولیه
+    setTimeout(() => {
+      // اضافه کردن چند ماینر نمونه
+      addSampleMiners();
+    }, 1000);
+  }
+
+  function addSampleMiners() {
+    const sampleMiners = [
+      { ip: "213.207.128.45", lat: 33.6274, lng: 46.4327, city: "ایلام" },
+      { ip: "185.74.0.67", lat: 33.2788, lng: 46.7131, city: "چرداول" },
+      { ip: "192.168.1.89", lat: 33.7523, lng: 46.295, city: "ایوان" },
+    ];
+
+    sampleMiners.forEach((miner) => {
+      const location = {
+        lat: miner.lat,
+        lng: miner.lng,
+        city: miner.city,
+        isp: "مخابرات ایران",
+        type: "miner",
+      };
+
+      addIPMarker(miner.ip, location);
+    });
+  }
+
+  function updateLocationData() {
+    // به‌روزرسانی داده‌های مکان
+    // در واقعیت از API زنده استفاده می‌شود
+  }
+
+  function handleIPSearch(event) {
+    if (event.key === "Enter") {
+      searchIPLocation();
+    }
+  }
+
+  // توابع عملیاتی
+  function scanIP(ip) {
+    console.log(`🔍 شروع اسکن IP: ${ip}`);
+    alert(`اسکن IP ${ip} شروع شد`);
+  }
+
+  function traceIP(ip) {
+    console.log(`🔍 ردیابی IP: ${ip}`);
+    alert(`ردیابی IP ${ip} شروع شد`);
+  }
+
+  function blockIP(ip) {
+    console.log(`🚫 مسدود کردن IP: ${ip}`);
+    if (confirm(`آیا مطمئن هستید که می‌خواهید IP ${ip} را مسدود کنید؟`)) {
+      alert(`IP ${ip} مسدود شد`);
+    }
+  }
+
+  function scanCityIPs(cityKey) {
+    const city = ilamCities[cityKey];
+    console.log(`🏙️ اسکن شهر ${city.name}`);
+    alert(`اسکن IP های شهر ${city.name} شروع شد`);
+  }
+
+  function showCityDetails(cityKey) {
+    const city = ilamCities[cityKey];
+    alert(`جزئیات شهر ${city.name}\nمختصات: ${city.lat}, ${city.lng}`);
+  }
+
+  function scanSelectedIP() {
+    const ip = document.getElementById("selected-ip").textContent;
+    if (ip && ip !== "-") {
+      scanIP(ip);
+    }
+  }
+
+  function exportMapData() {
+    const data = {
+      detected_locations: detectedLocations,
+      map_center: map.getCenter(),
+      zoom_level: map.getZoom(),
+      export_time: new Date().toISOString(),
+    };
+
+    const content = JSON.stringify(data, null, 2);
+    const blob = new Blob([content], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `map-data-${Date.now()}.json`;
+    a.click();
+
+    URL.revokeObjectURL(url);
+    console.log("💾 داده‌های نقشه صادر شد");
+  }
+</script>
+{% endblock %} {% block sidebar %}
+<div class="panel">
+  <div class="panel-header">🎯 دسترسی سریع</div>
+  <button
+    class="btn"
+    style="width: 100%; margin: 2px 0"
+    onclick="centerMapOnLocation(); document.getElementById('location-select').value='ilam';"
+  >
+    🏛️ ایلام
+  </button>
+  <button
+    class="btn"
+    style="width: 100%; margin: 2px 0"
+    onclick="addSampleMiners()"
+  >
+    ⛏️ نمایش ماینرهای نمونه
+  </button>
+  <button
+    class="btn"
+    style="width: 100%; margin: 2px 0"
+    onclick="clearAllMarkers()"
+  >
+    🗑️ پاک کردن نقشه
+  </button>
+</div>
+
+<div class="panel">
+  <div class="panel-header">📊 آمار نقشه</div>
+  <div style="font-size: 10px; line-height: 1.4">
+    <div>مارکرها: <span id="total-markers">0</span></div>
+    <div>ماینرها: <span id="total-miners">0</span></div>
+    <div>مشکوک: <span id="total-suspicious">0</span></div>
+    <div>آخرین به‌روزرسانی: <span id="last-update">-</span></div>
+  </div>
+</div>
+
+<script>
+  function clearAllMarkers() {
+    markersLayer.clearLayers();
+    currentMarkers = [];
+    detectedLocations = [];
+    document.getElementById("detected-list").innerHTML = "";
+    console.log("🗑️ همه مارکرها پاک شدند");
+  }
+
+  // به‌روزرسانی آمار نقشه
+  setInterval(() => {
+    document.getElementById("total-markers").textContent =
+      currentMarkers.length;
+    document.getElementById("total-miners").textContent = currentMarkers.filter(
+      (m) => m.locationType === "miner",
+    ).length;
+    document.getElementById("total-suspicious").textContent =
+      currentMarkers.filter((m) => m.locationType === "suspicious").length;
+    document.getElementById("last-update").textContent =
+      new Date().toLocaleTimeString("fa-IR");
+  }, 5000);
+</script>
+{% endblock %}
