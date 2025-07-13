@@ -84,7 +84,7 @@ def index():
 
 @app.route('/login_form')
 def login_form():
-    return render_template('login_classic.html')
+    return render_template('login_modern.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -376,7 +376,7 @@ def start_rf_scan():
         except ImportError:
         return jsonify({
             'status': 'error',
-            'message': 'ماژول اسکن RF در دسترس نیس��'
+            'message': 'ماژول اسکن RF در دسترس نیست'
         }), 500
     except Exception as e:
         return jsonify({
