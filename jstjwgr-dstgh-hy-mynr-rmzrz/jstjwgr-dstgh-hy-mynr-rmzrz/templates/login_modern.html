@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ورود - شبح حبشی</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Vazir:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Vazir", sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      /* پس‌زمینه انیمیشن دار */
+      .background-animation {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.1;
+        z-index: 0;
+      }
+
+      .floating-shape {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 20s infinite linear;
+      }
+
+      .floating-shape:nth-child(1) {
+        width: 80px;
+        height: 80px;
+        left: 10%;
+        animation-delay: 0s;
+      }
+
+      .floating-shape:nth-child(2) {
+        width: 60px;
+        height: 60px;
+        left: 80%;
+        animation-delay: 5s;
+      }
+
+      .floating-shape:nth-child(3) {
+        width: 100px;
+        height: 100px;
+        left: 50%;
+        animation-delay: 10s;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(100vh) rotate(0deg);
+        }
+        100% {
+          transform: translateY(-100px) rotate(360deg);
+        }
+      }
+
+      /* کانتینر اصلی لاگین */
+      .login-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        padding: 40px;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 1;
+        animation: slideUp 0.8s ease-out;
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* لوگو و عنوان */
+      .login-header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .app-logo {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(45deg, #f093fb, #f5576c);
+        border-radius: 20px;
+        margin: 0 auto 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        box-shadow: 0 10px 30px rgba(240, 147, 251, 0.3);
+        animation: logoFloat 3s ease-in-out infinite;
+      }
+
+      @keyframes logoFloat {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      .app-title {
+        color: white;
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .app-subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 14px;
+      }
+
+      /* فرم لاگین */
+      .login-form {
+        margin-top: 30px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+        position: relative;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 16px 20px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        color: white;
+        font-size: 16px;
+        font-family: "Vazir", sans-serif;
+        transition: all 0.3s ease;
+      }
+
+      .form-input::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: #f093fb;
+        box-shadow: 0 0 0 3px rgba(240, 147, 251, 0.3);
+        transform: translateY(-2px);
+      }
+
+      .input-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 18px;
+      }
+
+      /* دکمه ورود */
+      .login-button {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(45deg, #f093fb, #f5576c);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        font-family: "Vazir", sans-serif;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        margin-top: 10px;
+      }
+
+      .login-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(240, 147, 251, 0.4);
+      }
+
+      .login-button:active {
+        transform: translateY(0);
+      }
+
+      .login-button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .login-button:hover::before {
+        left: 100%;
+      }
+
+      /* اطلاعات اعتبار */
+      .demo-credentials {
+        margin-top: 20px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 14px;
+        text-align: center;
+      }
+
+      .demo-title {
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .credential-item {
+        margin: 4px 0;
+        font-family: "Courier New", monospace;
+      }
+
+      /* پیام خطا */
+      .error-message {
+        background: rgba(255, 87, 108, 0.2);
+        border: 1px solid rgba(255, 87, 108, 0.5);
+        border-radius: 8px;
+        padding: 12px;
+        color: #ff576c;
+        font-size: 14px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      /* ریسپانسیو */
+      @media (max-width: 480px) {
+        .login-container {
+          margin: 20px;
+          padding: 30px 20px;
+        }
+
+        .app-logo {
+          width: 60px;
+          height: 60px;
+          font-size: 30px;
+        }
+
+        .app-title {
+          font-size: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- پس‌زمینه انیمیشن -->
+    <div class="background-animation">
+      <div class="floating-shape"></div>
+      <div class="floating-shape"></div>
+      <div class="floating-shape"></div>
+    </div>
+
+    <!-- فرم لاگین -->
+    <div class="login-container">
+      <div class="login-header">
+        <div class="app-logo">👻</div>
+        <h1 class="app-title">شبح حبشی</h1>
+        <p class="app-subtitle">سیستم تشخیص ماینر رمزارز</p>
+      </div>
+
+      {% if error_message %}
+      <div class="error-message">{{ error_message }}</div>
+      {% endif %}
+
+      <form method="POST" class="login-form">
+        <div class="form-group">
+          <input
+            type="text"
+            name="username"
+            class="form-input"
+            placeholder="نام کاربری"
+            required
+            autocomplete="username"
+          />
+          <div class="input-icon">👤</div>
+        </div>
+
+        <div class="form-group">
+          <input
+            type="password"
+            name="password"
+            class="form-input"
+            placeholder="رمز عبور"
+            required
+            autocomplete="current-password"
+          />
+          <div class="input-icon">🔒</div>
+        </div>
+
+        <button type="submit" class="login-button">ورود به سیستم</button>
+      </form>
+
+      <div class="demo-credentials">
+        <div class="demo-title">اطلاعات دمو:</div>
+        <div class="credential-item">نام کاربری: admin</div>
+        <div class="credential-item">رمز عبور: admin123</div>
+      </div>
+    </div>
+
+    <script>
+      // انیمیشن ورود
+      document.addEventListener("DOMContentLoaded", function () {
+        const inputs = document.querySelectorAll(".form-input");
+
+        inputs.forEach((input, index) => {
+          setTimeout(
+            () => {
+              input.style.opacity = "0";
+              input.style.transform = "translateX(30px)";
+              input.style.transition = "all 0.5s ease";
+
+              setTimeout(() => {
+                input.style.opacity = "1";
+                input.style.transform = "translateX(0)";
+              }, 100);
+            },
+            index * 200 + 800,
+          );
+        });
+
+        // فوکوس خودکار
+        setTimeout(() => {
+          const usernameInput = document.querySelector(
+            'input[name="username"]',
+          );
+          if (usernameInput) {
+            usernameInput.focus();
+          }
+        }, 1500);
+      });
+
+      // افکت‌های تعاملی
+      const inputs = document.querySelectorAll(".form-input");
+      inputs.forEach((input) => {
+        input.addEventListener("focus", function () {
+          this.parentNode.style.transform = "scale(1.02)";
+        });
+
+        input.addEventListener("blur", function () {
+          this.parentNode.style.transform = "scale(1)";
+        });
+      });
+
+      // پر کردن خودکار فیلدها برای تست
+      function fillDemoCredentials() {
+        document.querySelector('input[name="username"]').value = "admin";
+        document.querySelector('input[name="password"]').value = "admin123";
+      }
+
+      // دوبار کلیک روی لوگو برای پر کردن خودکار
+      document
+        .querySelector(".app-logo")
+        .addEventListener("dblclick", fillDemoCredentials);
+    </script>
+  </body>
+</html>
