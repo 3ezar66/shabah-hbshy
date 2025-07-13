@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-سیستم جامع شناسایی و نظارت بر ماینرهای رمزارز
+سیستم ��امع شناسایی و نظارت بر ماینرهای رمزارز
 نرم‌افزار حرفه‌ای چندکاربره با رابط وب و بانک اطلاعاتی
 """
 
@@ -344,8 +344,8 @@ def geoip_lookup(ip):
         geoip = IranGeoIP()
         location = geoip.lookup_ip(ip)
 
-        return jsonify(location)
-        except ImportError:
+                return jsonify(location)
+    except ImportError:
         return jsonify({'error': 'ماژول مکان‌یابی در دسترس نیست'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
