@@ -284,9 +284,9 @@ def start_scan():
                 'scan_id': session_id,
                 'message': 'اسکن با موفقیت کامل شد',
                 'results': results
-            })
+                        })
 
-                except ImportError as e:
+        except ImportError as e:
             # اعلام خطا در صورت عدم دسترسی به ماژول
             scan_session.status = 'failed'
             scan_session.end_time = datetime.utcnow()
