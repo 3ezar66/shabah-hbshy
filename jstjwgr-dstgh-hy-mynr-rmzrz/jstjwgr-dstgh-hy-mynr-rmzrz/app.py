@@ -401,8 +401,8 @@ def ai_analyze():
         analyzer = FreeAIAnalyzer()
         analysis = analyzer.analyze_network_pattern(network_data)
 
-        return jsonify(analysis)
-        except ImportError:
+                return jsonify(analysis)
+    except ImportError:
         return jsonify({'error': 'ماژول تحلیل هوش مصنوعی در دسترس نیست'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
