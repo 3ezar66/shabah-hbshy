@@ -1,0 +1,990 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}سیستم تشخیص ماینر - استان ایلام{% endblock %}
+    </title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Vazir:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Vazir", sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #2d3748;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* پوسته اصلی ویندوز */
+      .window-frame {
+        background: #c0c0c0;
+        border: 2px outset #c0c0c0;
+        margin: 8px;
+        height: calc(100vh - 16px);
+        display: flex;
+        flex-direction: column;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+      }
+
+      /* نوار عنوان */
+      .title-bar {
+        background: linear-gradient(90deg, #0055aa 0%, #4488ff 100%);
+        color: white;
+        padding: 4px 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #000080;
+        font-weight: bold;
+        font-size: 12px;
+      }
+
+      .title-text {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .title-icon {
+        width: 16px;
+        height: 16px;
+        background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAFYSURBVDiNpZM9SwNBEIafgwQSCysrwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sLwcJCG1sL")
+          no-repeat center;
+        background-size: contain;
+      }
+
+      .window-controls {
+        display: flex;
+        gap: 2px;
+      }
+
+      .control-btn {
+        width: 16px;
+        height: 14px;
+        background: #c0c0c0;
+        border: 1px outset #c0c0c0;
+        font-size: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #000;
+      }
+
+      .control-btn:active {
+        border: 1px inset #c0c0c0;
+      }
+
+      /* نوار منو */
+      .menu-bar {
+        background: #c0c0c0;
+        border-bottom: 1px solid #808080;
+        display: flex;
+        padding: 2px;
+      }
+
+      .menu-item {
+        padding: 4px 12px;
+        cursor: pointer;
+        font-size: 11px;
+        position: relative;
+      }
+
+      .menu-item:hover {
+        background: #0055aa;
+        color: white;
+      }
+
+      .menu-item.active {
+        background: #0055aa;
+        color: white;
+      }
+
+      /* منوی آبشاری */
+      .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: #c0c0c0;
+        border: 2px outset #c0c0c0;
+        min-width: 180px;
+        display: none;
+        z-index: 1000;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+      }
+
+      .dropdown-menu.show {
+        display: block;
+      }
+
+      .dropdown-item {
+        padding: 6px 16px;
+        cursor: pointer;
+        font-size: 11px;
+        border-bottom: 1px solid #808080;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .dropdown-item:hover {
+        background: #0055aa;
+        color: white;
+      }
+
+      .dropdown-item:last-child {
+        border-bottom: none;
+      }
+
+      .dropdown-separator {
+        height: 1px;
+        background: #808080;
+        margin: 2px 8px;
+      }
+
+      /* نوار ابزار */
+      .toolbar {
+        background: #c0c0c0;
+        border-bottom: 1px solid #808080;
+        padding: 4px;
+        display: flex;
+        gap: 2px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .toolbar-btn {
+        width: 24px;
+        height: 24px;
+        background: #c0c0c0;
+        border: 1px outset #c0c0c0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+      }
+
+      .toolbar-btn:hover {
+        border: 1px outset #e0e0e0;
+      }
+
+      .toolbar-btn:active {
+        border: 1px inset #c0c0c0;
+      }
+
+      .toolbar-separator {
+        width: 1px;
+        height: 20px;
+        background: #808080;
+        margin: 0 4px;
+      }
+
+      /* منطقه محتوا */
+      .content-area {
+        flex: 1;
+        background: #c0c0c0;
+        display: flex;
+        overflow: hidden;
+      }
+
+      /* پنل کناری */
+      .sidebar {
+        width: 250px;
+        background: #c0c0c0;
+        border-left: 1px solid #808080;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sidebar-header {
+        background: #e0e0e0;
+        padding: 8px;
+        border-bottom: 1px solid #808080;
+        font-weight: bold;
+        font-size: 11px;
+      }
+
+      .sidebar-content {
+        flex: 1;
+        padding: 8px;
+        overflow-y: auto;
+      }
+
+      /* محتوای اصلی */
+      .main-content {
+        flex: 1;
+        background: white;
+        margin: 2px;
+        border: 1px inset #c0c0c0;
+        overflow: auto;
+        padding: 16px;
+      }
+
+      /* نوار وضعیت */
+      .status-bar {
+        background: #c0c0c0;
+        border-top: 1px solid #808080;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        padding: 0 8px;
+        font-size: 10px;
+        gap: 16px;
+      }
+
+      .status-panel {
+        border: 1px inset #c0c0c0;
+        padding: 1px 6px;
+        background: #f0f0f0;
+      }
+
+      /* کامپوننت‌های اصلی */
+      .panel {
+        background: #f0f0f0;
+        border: 2px inset #c0c0c0;
+        margin: 8px 0;
+        padding: 12px;
+      }
+
+      .panel-header {
+        background: #e0e0e0;
+        margin: -12px -12px 8px -12px;
+        padding: 6px 12px;
+        border-bottom: 1px solid #808080;
+        font-weight: bold;
+        font-size: 12px;
+      }
+
+      /* دکمه‌ها */
+      .btn {
+        background: #c0c0c0;
+        border: 2px outset #c0c0c0;
+        padding: 4px 12px;
+        cursor: pointer;
+        font-size: 11px;
+        font-family: "Vazir", sans-serif;
+        margin: 2px;
+      }
+
+      .btn:hover {
+        background: #d0d0d0;
+      }
+
+      .btn:active {
+        border: 2px inset #c0c0c0;
+      }
+
+      .btn-primary {
+        background: #0055aa;
+        color: white;
+        border: 2px outset #0055aa;
+      }
+
+      .btn-primary:hover {
+        background: #0066cc;
+      }
+
+      /* فرم‌ها */
+      .form-group {
+        margin: 8px 0;
+      }
+
+      .form-label {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 11px;
+        font-weight: bold;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 2px 4px;
+        border: 1px inset #c0c0c0;
+        font-size: 11px;
+        font-family: "Vazir", sans-serif;
+      }
+
+      .form-select {
+        width: 100%;
+        padding: 2px;
+        border: 1px inset #c0c0c0;
+        font-size: 11px;
+        font-family: "Vazir", sans-serif;
+        background: white;
+      }
+
+      /* آیکون‌ها */
+      .icon {
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+
+      .icon-scan {
+        background-color: #ff6b6b;
+      }
+      .icon-network {
+        background-color: #4ecdc4;
+      }
+      .icon-monitor {
+        background-color: #45b7d1;
+      }
+      .icon-report {
+        background-color: #96ceb4;
+      }
+      .icon-settings {
+        background-color: #ffeaa7;
+      }
+      .icon-help {
+        background-color: #dda0dd;
+      }
+
+      /* تب‌ها */
+      .tab-container {
+        border: 1px solid #808080;
+        margin: 8px 0;
+      }
+
+      .tab-headers {
+        background: #e0e0e0;
+        display: flex;
+        border-bottom: 1px solid #808080;
+      }
+
+      .tab-header {
+        padding: 6px 16px;
+        cursor: pointer;
+        font-size: 11px;
+        border-right: 1px solid #808080;
+        background: #c0c0c0;
+      }
+
+      .tab-header:last-child {
+        border-right: none;
+      }
+
+      .tab-header.active {
+        background: white;
+        border-bottom: 1px solid white;
+        margin-bottom: -1px;
+      }
+
+      .tab-content {
+        background: white;
+        padding: 12px;
+        min-height: 200px;
+      }
+
+      /* جدول */
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+        border: 1px solid #808080;
+      }
+
+      .data-table th {
+        background: #e0e0e0;
+        padding: 4px 8px;
+        border: 1px solid #808080;
+        text-align: right;
+      }
+
+      .data-table td {
+        padding: 4px 8px;
+        border: 1px solid #c0c0c0;
+      }
+
+      .data-table tr:nth-child(even) {
+        background: #f8f8f8;
+      }
+
+      /* نوار پیشرفت */
+      .progress-bar {
+        width: 100%;
+        height: 16px;
+        border: 1px inset #c0c0c0;
+        background: #c0c0c0;
+        position: relative;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #0055aa 0%, #4488ff 100%);
+        transition: width 0.3s ease;
+      }
+
+      .progress-text {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: white;
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+      }
+
+      /* ریسپانسیو */
+      @media (max-width: 768px) {
+        .window-frame {
+          margin: 4px;
+          height: calc(100vh - 8px);
+        }
+
+        .sidebar {
+          width: 200px;
+        }
+
+        .toolbar {
+          flex-wrap: wrap;
+        }
+
+        .menu-bar {
+          overflow-x: auto;
+        }
+      }
+
+      /* انیمیشن‌ها */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .fade-in {
+        animation: fadeIn 0.3s ease;
+      }
+
+      /* وضعیت‌ها */
+      .status-online {
+        color: #28a745;
+      }
+
+      .status-offline {
+        color: #dc3545;
+      }
+
+      .status-warning {
+        color: #ffc107;
+      }
+
+      /* برجسته‌سازی */
+      .highlight {
+        background: #ffff00;
+        padding: 2px 4px;
+      }
+
+      .danger {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #ffcdd2;
+        padding: 8px;
+        margin: 8px 0;
+      }
+
+      .warning {
+        background: #fff8e1;
+        color: #f57f17;
+        border: 1px solid #ffecb3;
+        padding: 8px;
+        margin: 8px 0;
+      }
+
+      .success {
+        background: #e8f5e8;
+        color: #2e7d32;
+        border: 1px solid #c8e6c9;
+        padding: 8px;
+        margin: 8px 0;
+      }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    <div class="window-frame">
+      <!-- نوار عنوان -->
+      <div class="title-bar">
+        <div class="title-text">
+          <div class="icon title-icon"></div>
+          <span
+            >{% block window_title %}سیستم تشخیص ماینر رمزارز - استان ایلام{%
+            endblock %}</span
+          >
+        </div>
+        <div class="window-controls">
+          <button class="control-btn" onclick="minimizeWindow()">_</button>
+          <button class="control-btn" onclick="maximizeWindow()">□</button>
+          <button class="control-btn" onclick="closeWindow()">×</button>
+        </div>
+      </div>
+
+      <!-- نوار منو -->
+      <div class="menu-bar">
+        <div class="menu-item" data-menu="file">
+          <span>فایل</span>
+          <div class="dropdown-menu">
+            <div class="dropdown-item" onclick="location.href='/'">
+              <span class="icon icon-scan"></span>
+              صفحه اصلی
+            </div>
+            <div class="dropdown-item" onclick="location.href='/scan_history'">
+              <span class="icon icon-report"></span>
+              تاریخچه اسکن
+            </div>
+            <div class="dropdown-separator"></div>
+            <div class="dropdown-item" onclick="exportData()">
+              <span class="icon icon-report"></span>
+              خروجی گزارش
+            </div>
+            <div class="dropdown-item" onclick="importData()">
+              📁 وارد کردن داده
+            </div>
+            <div class="dropdown-separator"></div>
+            <div class="dropdown-item" onclick="location.href='/logout'">
+              🚪 خروج
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-item" data-menu="tools">
+          <span>ابزارها</span>
+          <div class="dropdown-menu">
+            <div class="dropdown-item" onclick="startNetworkScan()">
+              <span class="icon icon-network"></span>
+              اسکن شبکه
+            </div>
+            <div class="dropdown-item" onclick="startRFScan()">
+              📡 اسکن RF/مغناطیسی
+            </div>
+            <div class="dropdown-item" onclick="startTrafficMonitor()">
+              <span class="icon icon-monitor"></span>
+              مانیتورینگ ترافیک
+            </div>
+            <div class="dropdown-separator"></div>
+            <div class="dropdown-item" onclick="openAIAnalysis()">
+              🤖 تحلیل هوش مصنوعی
+            </div>
+            <div class="dropdown-item" onclick="openGeoLocation()">
+              🗺️ مکان‌یابی
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-item" data-menu="view">
+          <span>نمایش</span>
+          <div class="dropdown-menu">
+            <div class="dropdown-item" onclick="toggleSidebar()">
+              📋 پنل کناری
+            </div>
+            <div class="dropdown-item" onclick="toggleStatusBar()">
+              📊 نوار وضعیت
+            </div>
+            <div class="dropdown-item" onclick="toggleFullScreen()">
+              🖥️ تمام صفحه
+            </div>
+            <div class="dropdown-separator"></div>
+            <div class="dropdown-item" onclick="refreshPage()">
+              🔄 تازه‌سازی
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-item" data-menu="help">
+          <span>راهنما</span>
+          <div class="dropdown-menu">
+            <div class="dropdown-item" onclick="location.href='/about'">
+              <span class="icon icon-help"></span>
+              درباره سیستم
+            </div>
+            <div class="dropdown-item" onclick="showHelp()">
+              📖 راهنمای کاربر
+            </div>
+            <div class="dropdown-item" onclick="showKeyboardShortcuts()">
+              ⌨️ کلیدهای میانبر
+            </div>
+            <div class="dropdown-separator"></div>
+            <div class="dropdown-item" onclick="showSystemInfo()">
+              ℹ️ اطلاعات سیستم
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- نوار ابزار -->
+      <div class="toolbar">
+        <button class="toolbar-btn" onclick="goBack()" title="برگشت">←</button>
+        <button class="toolbar-btn" onclick="goHome()" title="خانه">🏠</button>
+        <button class="toolbar-btn" onclick="refreshPage()" title="تازه‌سازی">
+          🔄
+        </button>
+
+        <div class="toolbar-separator"></div>
+
+        <button
+          class="toolbar-btn"
+          onclick="startQuickScan()"
+          title="اسکن سریع"
+        >
+          🔍
+        </button>
+        <button
+          class="toolbar-btn"
+          onclick="startMonitoring()"
+          title="مانیتورینگ"
+        >
+          📊
+        </button>
+        <button class="toolbar-btn" onclick="openMap()" title="نقشه">🗺️</button>
+
+        <div class="toolbar-separator"></div>
+
+        <button class="toolbar-btn" onclick="openSettings()" title="تنظیمات">
+          ⚙️
+        </button>
+        <button class="toolbar-btn" onclick="showHelp()" title="راهنما">
+          ❓
+        </button>
+      </div>
+
+      <!-- منطقه محتوا -->
+      <div class="content-area">
+        <!-- پنل کناری -->
+        <div class="sidebar" id="sidebar">
+          <div class="sidebar-header">کنترل سیستم</div>
+          <div class="sidebar-content">
+            {% block sidebar %}
+            <div class="panel">
+              <div class="panel-header">📊 وضعیت سیستم</div>
+              <div style="font-size: 10px; line-height: 1.4">
+                <div>وضعیت: <span class="status-online">آنلاین</span></div>
+                <div>CPU: <span id="cpu-usage">23%</span></div>
+                <div>RAM: <span id="ram-usage">45%</span></div>
+                <div>شبکه: <span id="network-status">فعال</span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">🔍 اسکن سریع</div>
+              <button
+                class="btn btn-primary"
+                style="width: 100%; margin: 4px 0"
+                onclick="startQuickScan()"
+              >
+                شروع اسکن
+              </button>
+              <div class="form-group">
+                <label class="form-label">محدوده IP:</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  id="quick-ip-range"
+                  value="192.168.1.0/24"
+                />
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">📍 انتخاب موقعیت</div>
+              <div class="form-group">
+                <label class="form-label">استان:</label>
+                <select
+                  class="form-select"
+                  id="province-select"
+                  onchange="updateCities()"
+                >
+                  <option value="">انتخاب استان</option>
+                  <option value="ilam">ایلام</option>
+                  <option value="tehran">تهران</option>
+                  <option value="isfahan">اصفهان</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">شهر:</label>
+                <select class="form-select" id="city-select">
+                  <option value="">انتخاب شهر</option>
+                </select>
+              </div>
+            </div>
+            {% endblock %}
+          </div>
+        </div>
+
+        <!-- محتوای اصلی -->
+        <div class="main-content">
+          {% block content %}
+          <h2>به سیستم تشخیص ماینر خوش آمدید</h2>
+          <p>
+            این سیستم برای تشخیص و مانیتورینگ دستگاه‌های استخراج رمزارز طراحی
+            شده است.
+          </p>
+          {% endblock %}
+        </div>
+      </div>
+
+      <!-- نوار وضعیت -->
+      <div class="status-bar" id="status-bar">
+        <div class="status-panel">آماده | <span id="current-time"></span></div>
+        <div class="status-panel">
+          تعداد اسکن: <span id="scan-count">0</span>
+        </div>
+        <div class="status-panel">IP فعال: <span id="active-ips">0</span></div>
+        <div class="status-panel">
+          ماینر شناسایی شده: <span id="detected-miners">0</span>
+        </div>
+        <div style="flex: 1"></div>
+        <div class="status-panel">طراح: عرفان رجبی (Erfan Rajabi)</div>
+      </div>
+    </div>
+
+    <script>
+      // مدیریت منوهای آبشاری
+      document.addEventListener("DOMContentLoaded", function () {
+        const menuItems = document.querySelectorAll(".menu-item");
+
+        menuItems.forEach((item) => {
+          const dropdown = item.querySelector(".dropdown-menu");
+
+          item.addEventListener("click", function (e) {
+            e.stopPropagation();
+
+            // بستن سایر منوها
+            document.querySelectorAll(".dropdown-menu").forEach((menu) => {
+              if (menu !== dropdown) {
+                menu.classList.remove("show");
+              }
+            });
+
+            document.querySelectorAll(".menu-item").forEach((mi) => {
+              if (mi !== item) {
+                mi.classList.remove("active");
+              }
+            });
+
+            // تغییر وضعیت منوی فعلی
+            dropdown.classList.toggle("show");
+            item.classList.toggle("active");
+          });
+        });
+
+        // بستن منوها با کلیک خارج
+        document.addEventListener("click", function () {
+          document.querySelectorAll(".dropdown-menu").forEach((menu) => {
+            menu.classList.remove("show");
+          });
+          document.querySelectorAll(".menu-item").forEach((item) => {
+            item.classList.remove("active");
+          });
+        });
+
+        // به‌روزرسانی ساعت
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // به‌روزرسانی وضعیت سیستم
+        setInterval(updateSystemStatus, 5000);
+      });
+
+      // توابع مدیریت پنجره
+      function minimizeWindow() {
+        console.log("Minimize window");
+      }
+
+      function maximizeWindow() {
+        const frame = document.querySelector(".window-frame");
+        frame.style.margin = frame.style.margin === "0px" ? "8px" : "0px";
+        frame.style.height =
+          frame.style.height === "100vh" ? "calc(100vh - 16px)" : "100vh";
+      }
+
+      function closeWindow() {
+        if (confirm("آیا مطمئن هستید که می‌خواهید برنامه را ببندید؟")) {
+          window.close();
+        }
+      }
+
+      // توابع ناوبری
+      function goBack() {
+        window.history.back();
+      }
+
+      function goHome() {
+        window.location.href = "/";
+      }
+
+      function refreshPage() {
+        window.location.reload();
+      }
+
+      // توابع عملکردی
+      function startQuickScan() {
+        const ipRange = document.getElementById("quick-ip-range").value;
+        alert(`شروع اسکن محدوده: ${ipRange}`);
+      }
+
+      function startNetworkScan() {
+        window.location.href = "/scan";
+      }
+
+      function startRFScan() {
+        alert("ماژول اسکن RF/مغناطیسی در حال توسعه است");
+      }
+
+      function startTrafficMonitor() {
+        alert("شروع مانیتورینگ ترافیک");
+      }
+
+      function startMonitoring() {
+        alert("شروع مانیتورینگ سیستم");
+      }
+
+      function openMap() {
+        alert("باز کردن نقشه");
+      }
+
+      function openSettings() {
+        alert("باز کردن تنظیمات");
+      }
+
+      function openAIAnalysis() {
+        alert("ماژول تحلیل هوش مصنوعی");
+      }
+
+      function openGeoLocation() {
+        alert("باز کردن مکان‌یابی");
+      }
+
+      function showHelp() {
+        alert("راهنمای سیستم");
+      }
+
+      function showKeyboardShortcuts() {
+        alert(
+          "کلیدهای میانبر:\nCtrl+S: اسکن سریع\nCtrl+M: مانیتورینگ\nF5: تازه‌سازی",
+        );
+      }
+
+      function showSystemInfo() {
+        alert("اطلاعات سیستم:\nورژن: 2.0\nتوسعه‌دهنده: عرفان رجبی");
+      }
+
+      function exportData() {
+        alert("خروجی گزارش");
+      }
+
+      function importData() {
+        alert("وارد کردن داده");
+      }
+
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        sidebar.style.display =
+          sidebar.style.display === "none" ? "flex" : "none";
+      }
+
+      function toggleStatusBar() {
+        const statusBar = document.getElementById("status-bar");
+        statusBar.style.display =
+          statusBar.style.display === "none" ? "flex" : "none";
+      }
+
+      function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+      }
+
+      // به‌روزرسانی ساعت
+      function updateClock() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString("fa-IR");
+        const dateString = now.toLocaleDateString("fa-IR");
+        document.getElementById("current-time").textContent =
+          `${timeString} - ${dateString}`;
+      }
+
+      // به‌روزرسانی وضعیت سیستم
+      function updateSystemStatus() {
+        document.getElementById("cpu-usage").textContent =
+          Math.floor(Math.random() * 50 + 10) + "%";
+        document.getElementById("ram-usage").textContent =
+          Math.floor(Math.random() * 30 + 30) + "%";
+      }
+
+      // به‌روزرسانی شهرها بر اساس استان
+      function updateCities() {
+        const province = document.getElementById("province-select").value;
+        const citySelect = document.getElementById("city-select");
+
+        const cities = {
+          ilam: [
+            "ایلام",
+            "ایوان",
+            "دره‌شهر",
+            "دهلران",
+            "آبدانان",
+            "مهران",
+            "ملکشاهی",
+            "سرابله",
+            "چرداول",
+            "شیروان و چرداول",
+          ],
+          tehran: ["تهران", "ری", "شمیرانات", "اسلامشهر", "پاکدشت"],
+          isfahan: ["اصفهان", "کاشان", "نجف‌آباد", "خمینی‌شهر", "شاهین‌شهر"],
+        };
+
+        citySelect.innerHTML = '<option value="">انتخاب شهر</option>';
+
+        if (province && cities[province]) {
+          cities[province].forEach((city) => {
+            const option = document.createElement("option");
+            option.value = city;
+            option.textContent = city;
+            citySelect.appendChild(option);
+          });
+        }
+      }
+
+      // کلیدهای میانبر
+      document.addEventListener("keydown", function (e) {
+        if (e.ctrlKey) {
+          switch (e.key) {
+            case "s":
+              e.preventDefault();
+              startQuickScan();
+              break;
+            case "m":
+              e.preventDefault();
+              startMonitoring();
+              break;
+          }
+        }
+      });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>
