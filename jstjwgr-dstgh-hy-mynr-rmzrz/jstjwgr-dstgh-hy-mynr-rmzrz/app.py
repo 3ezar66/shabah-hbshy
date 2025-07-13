@@ -399,9 +399,9 @@ def ai_analyze():
 
         from modules.ai.free_ai_models import FreeAIAnalyzer
         analyzer = FreeAIAnalyzer()
-        analysis = analyzer.analyze_network_pattern(network_data)
+                analysis = analyzer.analyze_network_pattern(network_data)
 
-                return jsonify(analysis)
+        return jsonify(analysis)
     except ImportError:
         return jsonify({'error': 'ماژول تحلیل هوش مصنوعی در دسترس نیست'}), 500
     except Exception as e:
@@ -434,7 +434,7 @@ def get_cities(province_code):
         'isfahan': ['اصفهان', 'کاشان', 'نجف‌آباد', 'خمینی‌شهر', 'شاهین‌شهر'],
         'shiraz': ['شیراز', 'کازرون', 'مرودشت', 'جهرم', 'لار'],
         'tabriz': ['تبریز', 'مراغه', 'اهر', 'بناب', 'میانه'],
-        'mashhad': ['مشهد', 'نیشابور', 'سبزوار', 'کاشمر', 'گناباد']
+        'mashhad': ['مشهد', 'نیشابو��', 'سبزوار', 'کاشمر', 'گناباد']
     }
 
     cities = cities_data.get(province_code, [])
