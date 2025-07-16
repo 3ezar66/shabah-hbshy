@@ -1,0 +1,567 @@
+{% extends "shell_modern.html" %} {% block title %}تاریخچه اسکن‌ها - سیستم
+شناسایی ماینر{% endblock %} {% block content %}
+<div class="panel">
+  <div class="panel-header">
+    <i class="fas fa-history icon-16"></i> تاریخچه اسکن‌ها و مدیریت جلسات
+  </div>
+
+  <!-- Filter and Search -->
+  <div class="toolbar" style="margin: 8px 0">
+    <button class="toolbar-button" onclick="filterScans('all')">
+      <i class="fas fa-list icon-16"></i>
+      همه
+    </button>
+    <button class="toolbar-button" onclick="filterScans('running')">
+      <i class="fas fa-play icon-16" style="color: #008000"></i>
+      در حال اجرا
+    </button>
+    <button class="toolbar-button" onclick="filterScans('completed')">
+      <i class="fas fa-check icon-16" style="color: #000080"></i>
+      تکمیل شده
+    </button>
+    <button class="toolbar-button" onclick="filterScans('failed')">
+      <i class="fas fa-times icon-16" style="color: #ff0000"></i>
+      ناموفق
+    </button>
+    <div class="toolbar-separator"></div>
+    <button class="toolbar-button" onclick="refreshScans()">
+      <i class="fas fa-sync-alt icon-16"></i>
+      تازه‌سازی
+    </button>
+    <button class="toolbar-button" onclick="deleteSelected()">
+      <i class="fas fa-trash icon-16"></i>
+      حذف انتخاب شده
+    </button>
+  </div>
+
+  <!-- Scan List -->
+  <div class="listview">
+    <div class="listview-header">
+      <div style="display: flex; align-items: center">
+        <input
+          type="checkbox"
+          id="selectAll"
+          onchange="toggleAllSelection()"
+          style="margin-left: 8px"
+        />
+        <span style="flex: 1">شناسه جلسه</span>
+        <span style="width: 100px">نوع اسکن</span>
+        <span style="width: 120px">محدوده هدف</span>
+        <span style="width: 80px">وضعیت</span>
+        <span style="width: 80px">پیشرفت</span>
+        <span style="width: 100px">یافته‌ها</span>
+        <span style="width: 140px">زمان شروع</span>
+        <span style="width: 100px">عملیات</span>
+      </div>
+    </div>
+
+    <div id="scansList">
+      <!-- Sample data - will be replaced by real data -->
+      <div
+        class="listview-item scan-item"
+        data-status="running"
+        data-id="session-001"
+        onclick="selectScan(this)"
+      >
+        <input type="checkbox" class="scan-checkbox" style="margin-left: 8px" />
+        <span style="flex: 1; font-family: &quot;Courier New&quot;, monospace"
+          >session-001</span
+        >
+        <span style="width: 100px">شبکه کامل</span>
+        <span style="width: 120px">192.168.1.0/24</span>
+        <span style="width: 80px">
+          <span class="status-badge running">در حال اجرا</span>
+        </span>
+        <span style="width: 80px">
+          <div class="progress-mini">
+            <div class="progress-mini-bar" style="width: 65%"></div>
+            <span class="progress-mini-text">65%</span>
+          </div>
+        </span>
+        <span style="width: 100px">3 ماینر</span>
+        <span style="width: 140px">۱۴۰۳/۰۷/۱۵ ۱۴:۳۰</span>
+        <span style="width: 100px">
+          <button
+            class="btn-mini"
+            onclick="viewScan('session-001')"
+            title="مشاهده جزئیات"
+          >
+            <i class="fas fa-eye"></i>
+          </button>
+          <button
+            class="btn-mini"
+            onclick="pauseScan('session-001')"
+            title="توقف"
+          >
+            <i class="fas fa-pause"></i>
+          </button>
+        </span>
+      </div>
+
+      <div
+        class="listview-item scan-item"
+        data-status="completed"
+        data-id="session-002"
+        onclick="selectScan(this)"
+      >
+        <input type="checkbox" class="scan-checkbox" style="margin-left: 8px" />
+        <span style="flex: 1; font-family: &quot;Courier New&quot;, monospace"
+          >session-002</span
+        >
+        <span style="width: 100px">اسکن سریع</span>
+        <span style="width: 120px">192.168.1.0/24</span>
+        <span style="width: 80px">
+          <span class="status-badge completed">تکمیل شده</span>
+        </span>
+        <span style="width: 80px">
+          <div class="progress-mini">
+            <div class="progress-mini-bar" style="width: 100%"></div>
+            <span class="progress-mini-text">100%</span>
+          </div>
+        </span>
+        <span style="width: 100px">1 ماینر</span>
+        <span style="width: 140px">۱۴۰۳/۰۷/۱۵ ۱۲:۱۵</span>
+        <span style="width: 100px">
+          <button
+            class="btn-mini"
+            onclick="viewScan('session-002')"
+            title="مشاهده جزئیات"
+          >
+            <i class="fas fa-eye"></i>
+          </button>
+          <button
+            class="btn-mini"
+            onclick="downloadReport('session-002')"
+            title="دانلود گزارش"
+          >
+            <i class="fas fa-download"></i>
+          </button>
+        </span>
+      </div>
+
+      <div
+        class="listview-item scan-item"
+        data-status="failed"
+        data-id="session-003"
+        onclick="selectScan(this)"
+      >
+        <input type="checkbox" class="scan-checkbox" style="margin-left: 8px" />
+        <span style="flex: 1; font-family: &quot;Courier New&quot;, monospace"
+          >session-003</span
+        >
+        <span style="width: 100px">اسکن عمیق</span>
+        <span style="width: 120px">10.0.0.0/16</span>
+        <span style="width: 80px">
+          <span class="status-badge failed">ناموفق</span>
+        </span>
+        <span style="width: 80px">
+          <div class="progress-mini">
+            <div class="progress-mini-bar" style="width: 25%"></div>
+            <span class="progress-mini-text">25%</span>
+          </div>
+        </span>
+        <span style="width: 100px">-</span>
+        <span style="width: 140px">۱۴۰۳/۰۷/۱۵ ۱۰:۰۰</span>
+        <span style="width: 100px">
+          <button
+            class="btn-mini"
+            onclick="viewScan('session-003')"
+            title="مشاهده خطا"
+          >
+            <i class="fas fa-exclamation-triangle"></i>
+          </button>
+          <button
+            class="btn-mini"
+            onclick="retryScan('session-003')"
+            title="تلاش مجدد"
+          >
+            <i class="fas fa-redo"></i>
+          </button>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scan Details Panel -->
+  <div
+    class="panel"
+    id="scanDetailsPanel"
+    style="display: none; margin-top: 10px"
+  >
+    <div class="panel-header">
+      جزئیات اسکن
+      <button
+        onclick="closeScanDetails()"
+        style="float: left; background: transparent; border: none"
+      >
+        ×
+      </button>
+    </div>
+    <div id="scanDetailsContent">
+      <!-- Will be populated by JavaScript -->
+    </div>
+  </div>
+
+  <!-- Summary Panel -->
+  <div class="panel" style="margin-top: 10px">
+    <div class="panel-header">خلاصه آماری</div>
+    <div style="display: flex; gap: 20px; padding: 8px">
+      <div class="stat-box">
+        <div class="stat-number" id="totalScans">0</div>
+        <div class="stat-label">کل اسکن‌ها</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="runningScans">0</div>
+        <div class="stat-label">در حال اجرا</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="completedScans">0</div>
+        <div class="stat-label">تکمیل شده</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="failedScans">0</div>
+        <div class="stat-label">ناموفق</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number" id="totalMiners">0</div>
+        <div class="stat-label">کل ماینرها</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .status-badge {
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-size: 10px;
+    font-weight: bold;
+  }
+
+  .status-badge.running {
+    background: #90ee90;
+    color: #006400;
+  }
+
+  .status-badge.completed {
+    background: #add8e6;
+    color: #000080;
+  }
+
+  .status-badge.failed {
+    background: #ffb6c1;
+    color: #8b0000;
+  }
+
+  .progress-mini {
+    position: relative;
+    width: 60px;
+    height: 12px;
+    border: 1px inset #c0c0c0;
+    background: #f0f0f0;
+  }
+
+  .progress-mini-bar {
+    height: 100%;
+    background: linear-gradient(to right, #0080ff, #004080);
+    transition: width 0.3s ease;
+  }
+
+  .progress-mini-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 9px;
+    font-weight: bold;
+    color: #000;
+  }
+
+  .btn-mini {
+    background: #c0c0c0;
+    border: 1px outset #c0c0c0;
+    width: 24px;
+    height: 20px;
+    font-size: 10px;
+    cursor: pointer;
+    margin: 0 1px;
+  }
+
+  .btn-mini:hover {
+    border: 1px inset #c0c0c0;
+  }
+
+  .scan-item.selected {
+    background: #0080ff;
+    color: white;
+  }
+
+  .stat-box {
+    text-align: center;
+    border: 1px inset #c0c0c0;
+    padding: 8px;
+    background: #f0f0f0;
+    min-width: 80px;
+  }
+
+  .stat-number {
+    font-size: 18px;
+    font-weight: bold;
+    color: #000080;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: #606060;
+  }
+
+  .listview-item {
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .listview-header > div {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+  }
+</style>
+
+<script>
+  let selectedScans = [];
+  let allScans = [];
+
+  // Load scan data
+  function loadScanData() {
+    fetch("/api/scan_sessions")
+      .then((response) => response.json())
+      .then((data) => {
+        allScans = data;
+        displayScans(allScans);
+        updateStatistics();
+      })
+      .catch((error) => {
+        console.error("Error loading scan data:", error);
+        // Use sample data for now
+        updateStatistics();
+      });
+  }
+
+  // Display scans in the list
+  function displayScans(scans) {
+    const scansList = document.getElementById("scansList");
+    // Implementation would populate with real scan data
+    updateStatistics();
+  }
+
+  // Filter scans by status
+  function filterScans(status) {
+    const items = document.querySelectorAll(".scan-item");
+    items.forEach((item) => {
+      if (status === "all" || item.dataset.status === status) {
+        item.style.display = "flex";
+      } else {
+        item.style.display = "none";
+      }
+    });
+
+    // Update toolbar button states
+    document.querySelectorAll(".toolbar-button").forEach((btn) => {
+      btn.style.background = "#c0c0c0";
+    });
+    event.target.style.background = "#a0a0a0";
+  }
+
+  // Select scan item
+  function selectScan(element) {
+    // Remove previous selection
+    document.querySelectorAll(".scan-item").forEach((item) => {
+      item.classList.remove("selected");
+    });
+
+    // Add selection to clicked item
+    element.classList.add("selected");
+
+    // Show scan details
+    showScanDetails(element.dataset.id);
+  }
+
+  // Show scan details
+  function showScanDetails(scanId) {
+    const panel = document.getElementById("scanDetailsPanel");
+    const content = document.getElementById("scanDetailsContent");
+
+    // Sample details - would be fetched from API
+    content.innerHTML = `
+            <div style="display: flex; gap: 20px;">
+                <div style="flex: 1;">
+                    <h6>اطلاعات اسکن</h6>
+                    <p><strong>شناسه:</strong> ${scanId}</p>
+                    <p><strong>زمان شروع:</strong> ۱۴۰۳/۰۷/۱۵ ۱۴:۳۰:۲۵</p>
+                    <p><strong>مدت زمان:</strong> ۱۵ دقیقه و ۳۲ ثانیه</p>
+                    <p><strong>میزبان‌های اسکن شده:</strong> ۲۵۴</p>
+                    <p><strong>میزبان‌های فعال:</strong> ۳۲</p>
+                </div>
+                <div style="flex: 1;">
+                    <h6>نتایج یافته‌ها</h6>
+                    <p><strong>ماینرهای شناسایی شده:</strong> ۳</p>
+                    <p><strong>پورت‌های مشکوک:</strong> ۸</p>
+                    <p><strong>اتصالات مشکوک:</strong> ۵</p>
+                    <p><strong>سطح تهدید:</strong> متوسط</p>
+                    <p><strong>امتیاز اطمینان:</strong> ۸۵%</p>
+                </div>
+                <div style="flex: 1;">
+                    <h6>لاگ فعالیت</h6>
+                    <div style="background: #000; color: #00ff00; padding: 8px; font-family: 'Courier New', monospace; font-size: 10px; height: 100px; overflow-y: auto;">
+                        [14:30:25] شروع اسکن شبکه 192.168.1.0/24<br>
+                        [14:30:26] پینگ میزبان‌ها...<br>
+                        [14:30:35] یافتن 32 میزبان فعال<br>
+                        [14:32:15] شناسایی پورت مشکوک 4028 در 192.168.1.15<br>
+                        [14:33:45] تشخیص ماینر در 192.168.1.15<br>
+                        [14:45:57] اتمام اسکن - 3 ماینر یافت شد
+                    </div>
+                </div>
+            </div>
+        `;
+
+    panel.style.display = "block";
+  }
+
+  // Close scan details
+  function closeScanDetails() {
+    document.getElementById("scanDetailsPanel").style.display = "none";
+    document.querySelectorAll(".scan-item").forEach((item) => {
+      item.classList.remove("selected");
+    });
+  }
+
+  // View scan details in new page
+  function viewScan(scanId) {
+    window.location.href = `/scan_progress/${scanId}`;
+  }
+
+  // Pause scan
+  function pauseScan(scanId) {
+    if (confirm("آیا می‌خواهید این اسکن را متوقف کنید؟")) {
+      fetch(`/api/pause_scan/${scanId}`, { method: "POST" })
+        .then((response) => response.json())
+        .then((data) => {
+          showAlert("اسکن متوقف شد", "success");
+          refreshScans();
+        });
+    }
+  }
+
+  // Download report
+  function downloadReport(scanId) {
+    window.open(`/api/download_report/${scanId}`, "_blank");
+  }
+
+  // Retry failed scan
+  function retryScan(scanId) {
+    if (confirm("آیا می‌خواهید این اسکن را مجدداً اجرا کنید؟")) {
+      fetch(`/api/retry_scan/${scanId}`, { method: "POST" })
+        .then((response) => response.json())
+        .then((data) => {
+          showAlert("اسکن مجدد شروع شد", "success");
+          refreshScans();
+        });
+    }
+  }
+
+  // Toggle all selection
+  function toggleAllSelection() {
+    const selectAll = document.getElementById("selectAll");
+    const checkboxes = document.querySelectorAll(".scan-checkbox");
+
+    checkboxes.forEach((cb) => {
+      cb.checked = selectAll.checked;
+    });
+  }
+
+  // Delete selected scans
+  function deleteSelected() {
+    const selected = document.querySelectorAll(".scan-checkbox:checked");
+    if (selected.length === 0) {
+      alert("لطفاً ابتدا اسکن‌هایی را برای حذف انتخاب کنید");
+      return;
+    }
+
+    if (
+      confirm(`آیا می‌خ��اهید ${selected.length} اسکن انتخاب شده را حذف کنید؟`)
+    ) {
+      // Implementation for deletion
+      showAlert(`${selected.length} اسکن حذف شد`, "success");
+      refreshScans();
+    }
+  }
+
+  // Refresh scans list
+  function refreshScans() {
+    document.getElementById("currentAction").textContent =
+      "در حال تازه‌سازی...";
+    loadScanData();
+    setTimeout(() => {
+      document.getElementById("currentAction").textContent =
+        "تازه‌سازی تکمیل شد";
+    }, 1000);
+  }
+
+  // Update statistics
+  function updateStatistics() {
+    const runningCount = document.querySelectorAll(
+      '.scan-item[data-status="running"]',
+    ).length;
+    const completedCount = document.querySelectorAll(
+      '.scan-item[data-status="completed"]',
+    ).length;
+    const failedCount = document.querySelectorAll(
+      '.scan-item[data-status="failed"]',
+    ).length;
+    const totalCount = runningCount + completedCount + failedCount;
+
+    document.getElementById("totalScans").textContent = totalCount;
+    document.getElementById("runningScans").textContent = runningCount;
+    document.getElementById("completedScans").textContent = completedCount;
+    document.getElementById("failedScans").textContent = failedCount;
+    document.getElementById("totalMiners").textContent = "4"; // Sample
+
+    // Update scan count in status bar
+    document.getElementById("scanCount").textContent =
+      `اسکن‌های فعال: ${runningCount}`;
+  }
+
+  // Show alert
+  function showAlert(message, type) {
+    const alertDiv = document.createElement("div");
+    alertDiv.className = "panel";
+    alertDiv.style.background = type === "error" ? "#ffe0e0" : "#e0ffe0";
+    alertDiv.style.borderColor = type === "error" ? "#ff0000" : "#008000";
+    alertDiv.innerHTML = `
+            ${message}
+            <button onclick="this.parentElement.remove()" style="float: left; background: transparent; border: none; font-weight: bold;">×</button>
+        `;
+    document
+      .querySelector(".window-content")
+      .insertBefore(
+        alertDiv,
+        document.querySelector(".window-content").firstChild,
+      );
+
+    setTimeout(() => {
+      alertDiv.remove();
+    }, 3000);
+  }
+
+  // Initialize page
+  document.addEventListener("DOMContentLoaded", function () {
+    loadScanData();
+    updateStatistics();
+
+    // Auto-refresh every 30 seconds
+    setInterval(loadScanData, 30000);
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,1349 @@
+{% extends "shell_modern.html" %} {% block title %}اسکن شبکه زنده - استان
+ایلام{% endblock %} {% block window_title %}اسکن شبکه زنده و تشخیص ماینر{%
+endblock %} {% block extra_css %}
+<style>
+  .scanner-main {
+    display: flex;
+    gap: 12px;
+    height: 100%;
+  }
+
+  .scanner-left {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .scanner-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .scan-controls {
+    background: #f0f0f0;
+    border: 2px inset #c0c0c0;
+    padding: 8px;
+  }
+
+  .control-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 4px 0;
+  }
+
+  .control-row label {
+    min-width: 80px;
+    font-size: 11px;
+    font-weight: bold;
+  }
+
+  .control-row input,
+  .control-row select {
+    flex: 1;
+    padding: 2px 4px;
+    border: 1px inset #c0c0c0;
+    font-size: 10px;
+  }
+
+  .scan-display {
+    flex: 1;
+    background: #000;
+    color: #00ff00;
+    font-family: "Courier New", monospace;
+    font-size: 10px;
+    padding: 8px;
+    border: 2px inset #c0c0c0;
+    overflow-y: auto;
+    line-height: 1.2;
+  }
+
+  .scan-line {
+    margin: 1px 0;
+    word-wrap: break-word;
+  }
+
+  .scan-timestamp {
+    color: #666;
+  }
+
+  .scan-ip {
+    color: #00ffff;
+    font-weight: bold;
+  }
+
+  .scan-port {
+    color: #ffff00;
+  }
+
+  .scan-status-open {
+    color: #00ff00;
+    font-weight: bold;
+  }
+
+  .scan-status-closed {
+    color: #ff6666;
+  }
+
+  .scan-error {
+    color: #ff0000;
+  }
+
+  .scan-success {
+    color: #00ff00;
+    font-weight: bold;
+  }
+
+  .scan-warning {
+    color: #ffaa00;
+  }
+
+  .live-stats {
+    background: #f0f0f0;
+    border: 2px inset #c0c0c0;
+    padding: 8px;
+    height: 120px;
+    overflow-y: auto;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    margin: 2px 0;
+  }
+
+  .stat-label {
+    font-weight: bold;
+  }
+
+  .stat-value {
+    color: #0000ff;
+    font-family: monospace;
+  }
+
+  .progress-section {
+    background: #f0f0f0;
+    border: 2px inset #c0c0c0;
+    padding: 8px;
+  }
+
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+  }
+
+  .progress-label {
+    min-width: 60px;
+    font-size: 10px;
+    font-weight: bold;
+  }
+
+  .progress-bar-container {
+    flex: 1;
+    height: 12px;
+    background: #c0c0c0;
+    border: 1px inset #c0c0c0;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0055aa 0%, #4488ff 100%);
+    transition: width 0.3s ease;
+  }
+
+  .progress-text {
+    min-width: 40px;
+    font-size: 9px;
+    text-align: right;
+  }
+
+  .detected-miners {
+    background: #fff0f0;
+    border: 2px inset #c0c0c0;
+    padding: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .miner-item {
+    background: #ffeeee;
+    border: 1px solid #cc0000;
+    padding: 4px;
+    margin: 2px 0;
+    font-size: 10px;
+  }
+
+  .miner-ip {
+    font-weight: bold;
+    color: #cc0000;
+  }
+
+  .miner-details {
+    margin-top: 2px;
+    color: #666;
+  }
+
+  .network-map {
+    background: #f8f8f8;
+    border: 2px inset #c0c0c0;
+    padding: 8px;
+    height: 250px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .network-node {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1px solid #000;
+    cursor: pointer;
+  }
+
+  .node-normal {
+    background: #00ff00;
+  }
+
+  .node-scanning {
+    background: #ffff00;
+    animation: pulse 1s infinite;
+  }
+
+  .node-suspicious {
+    background: #ff8800;
+  }
+
+  .node-miner {
+    background: #ff0000;
+    animation: blink 0.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.3);
+    }
+  }
+
+  @keyframes blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.3;
+    }
+  }
+
+  .scan-tools {
+    background: #f0f0f0;
+    border: 2px inset #c0c0c0;
+    padding: 8px;
+  }
+
+  .tool-row {
+    display: flex;
+    gap: 4px;
+    margin: 2px 0;
+  }
+
+  .tool-checkbox {
+    width: 12px;
+    height: 12px;
+  }
+
+  .tool-label {
+    font-size: 10px;
+    flex: 1;
+  }
+
+  .log-export {
+    background: #f0f0f0;
+    border: 2px inset #c0c0c0;
+    padding: 8px;
+  }
+
+  .export-btn {
+    width: 100%;
+    margin: 2px 0;
+    padding: 4px;
+    font-size: 10px;
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="scanner-main">
+  <!-- بخش اصلی اسکن -->
+  <div class="scanner-left">
+    <!-- کنترل��های اسکن -->
+    <div class="scan-controls">
+      <div class="panel-header">🔧 تنظیمات اسکن</div>
+
+      <div class="control-row">
+        <label>هدف:</label>
+        <select id="scan-target-type" onchange="updateTargetOptions()">
+          <option value="ip_range">محدوده IP</option>
+          <option value="province">استان</option>
+          <option value="city">شهر</option>
+          <option value="custom">سفارشی</option>
+        </select>
+      </div>
+
+      <div class="control-row">
+        <label>مقدار:</label>
+        <input
+          type="text"
+          id="scan-target-value"
+          value="192.168.1.0/24"
+          placeholder="محدوده یا آدرس"
+        />
+      </div>
+
+      <div class="control-row">
+        <label>پورت‌ها:</label>
+        <input
+          type="text"
+          id="scan-ports"
+          value="22,80,443,3333,4444,5555,7777,8080"
+          placeholder="پورت‌های اسکن"
+        />
+      </div>
+
+      <div class="control-row">
+        <label>سرعت:</label>
+        <select id="scan-speed">
+          <option value="slow">آهست�� (دقیق)</option>
+          <option value="normal" selected>معمولی</option>
+          <option value="fast">سریع</option>
+          <option value="aggressive">تهاجمی</option>
+        </select>
+      </div>
+
+      <div class="control-row">
+        <button
+          class="btn btn-primary"
+          onclick="startRealScan()"
+          id="start-btn"
+        >
+          🚀 شروع اسکن
+        </button>
+        <button class="btn" onclick="pauseScan()" id="pause-btn" disabled>
+          ⏸️ مکث
+        </button>
+        <button class="btn" onclick="stopScan()" id="stop-btn" disabled>
+          ⏹️ توقف
+        </button>
+      </div>
+    </div>
+
+    <!-- نمایش زنده اسکن -->
+    <div class="scan-display" id="scan-output">
+      <div class="scan-line">🟢 سیستم تشخیص ماینر آماده است...</div>
+      <div class="scan-line">📡 مانیتورینگ شبکه فعال</div>
+      <div class="scan-line">🔍 در انتظار شروع اسکن...</div>
+    </div>
+  </div>
+
+  <!-- بخش کناری -->
+  <div class="scanner-right">
+    <!-- آمار زنده -->
+    <div class="live-stats">
+      <div class="panel-header">📊 آمار زنده</div>
+      <div class="stat-row">
+        <span class="stat-label">IP های اسکن شده:</span>
+        <span class="stat-value" id="stat-scanned-ips">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">پورت‌های باز:</span>
+        <span class="stat-value" id="stat-open-ports">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">هاست‌های فعال:</span>
+        <span class="stat-value" id="stat-active-hosts">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">ماینرهای یافت شده:</span>
+        <span class="stat-value" id="stat-miners-found">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">زمان سپری شده:</span>
+        <span class="stat-value" id="stat-elapsed-time">00:00:00</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">درصد تکمیل:</span>
+        <span class="stat-value" id="stat-completion">0%</span>
+      </div>
+    </div>
+
+    <!-- نوار پیشرفت -->
+    <div class="progress-section">
+      <div class="panel-header">📈 پیشرفت اسکن</div>
+
+      <div class="progress-row">
+        <span class="progress-label">کل:</span>
+        <div class="progress-bar-container">
+          <div
+            class="progress-bar-fill"
+            id="progress-overall"
+            style="width: 0%"
+          ></div>
+        </div>
+        <span class="progress-text" id="progress-overall-text">0%</span>
+      </div>
+
+      <div class="progress-row">
+        <span class="progress-label">پورت:</span>
+        <div class="progress-bar-container">
+          <div
+            class="progress-bar-fill"
+            id="progress-port"
+            style="width: 0%"
+          ></div>
+        </div>
+        <span class="progress-text" id="progress-port-text">0%</span>
+      </div>
+
+      <div class="progress-row">
+        <span class="progress-label">هاست:</span>
+        <div class="progress-bar-container">
+          <div
+            class="progress-bar-fill"
+            id="progress-host"
+            style="width: 0%"
+          ></div>
+        </div>
+        <span class="progress-text" id="progress-host-text">0%</span>
+      </div>
+    </div>
+
+    <!-- ابزارهای اسکن -->
+    <div class="scan-tools">
+      <div class="panel-header">🛠️ ابزارهای فعال</div>
+
+      <div class="tool-row">
+        <input type="checkbox" class="tool-checkbox" id="tool-nmap" checked />
+        <label class="tool-label" for="tool-nmap">Nmap Port Scanner</label>
+      </div>
+
+      <div class="tool-row">
+        <input type="checkbox" class="tool-checkbox" id="tool-ping" checked />
+        <label class="tool-label" for="tool-ping">Ping Sweep</label>
+      </div>
+
+      <div class="tool-row">
+        <input
+          type="checkbox"
+          class="tool-checkbox"
+          id="tool-stratum"
+          checked
+        />
+        <label class="tool-label" for="tool-stratum">Stratum Detection</label>
+      </div>
+
+      <div class="tool-row">
+        <input type="checkbox" class="tool-checkbox" id="tool-banner" checked />
+        <label class="tool-label" for="tool-banner">Banner Grabbing</label>
+      </div>
+
+      <div class="tool-row">
+        <input type="checkbox" class="tool-checkbox" id="tool-os" />
+        <label class="tool-label" for="tool-os">OS Detection</label>
+      </div>
+
+      <div class="tool-row">
+        <input type="checkbox" class="tool-checkbox" id="tool-vuln" />
+        <label class="tool-label" for="tool-vuln">Vulnerability Scan</label>
+      </div>
+    </div>
+
+    <!-- نقشه شبکه -->
+    <div class="network-map" id="network-map">
+      <div class="panel-header">🗺️ نقشه شبکه</div>
+      <!-- نودهای شبکه به صورت پویا اضافه می‌شوند -->
+    </div>
+
+    <!-- ماینرهای شناسایی شده -->
+    <div class="detected-miners">
+      <div class="panel-header">🚨 ماینرهای شناسایی شده</div>
+      <div id="miners-list">
+        <!-- لیست ماینرها به صورت پویا اضافه می‌شود -->
+      </div>
+    </div>
+
+    <!-- خروجی گزارش -->
+    <div class="log-export">
+      <div class="panel-header">📋 خروجی</div>
+      <button class="btn export-btn" onclick="exportScanLog('txt')">
+        💾 متن
+      </button>
+      <button class="btn export-btn" onclick="exportScanLog('json')">
+        📄 JSON
+      </button>
+      <button class="btn export-btn" onclick="exportScanLog('csv')">
+        📊 CSV
+      </button>
+      <button class="btn export-btn" onclick="exportScanLog('xml')">
+        🔖 XML
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // متغیرهای سراسری اسکن
+  let scanData = {
+    isRunning: false,
+    isPaused: false,
+    startTime: null,
+    targetIPs: [],
+    currentIPIndex: 0,
+    currentPortIndex: 0,
+    ports: [],
+    results: [],
+    stats: {
+      scannedIPs: 0,
+      openPorts: 0,
+      activeHosts: 0,
+      minersFound: 0,
+    },
+    tools: {},
+    scanLogs: [],
+  };
+
+  // راه‌اندازی اولیه
+  document.addEventListener("DOMContentLoaded", function () {
+    updateToolsState();
+    initializeNetworkMap();
+
+    // به‌روزرسانی آمار هر ثانیه
+    setInterval(updateStats, 1000);
+
+    // بارگذاری استان‌های ایران
+    loadIranProvinces();
+  });
+
+  function updateTargetOptions() {
+    const targetType = document.getElementById("scan-target-type").value;
+    const targetValue = document.getElementById("scan-target-value");
+
+    switch (targetType) {
+      case "ip_range":
+        targetValue.value = "192.168.1.0/24";
+        targetValue.placeholder = "مثال: 192.168.1.0/24";
+        break;
+      case "province":
+        targetValue.value = "ایلام";
+        targetValue.placeholder = "نام استان";
+        break;
+      case "city":
+        targetValue.value = "ایلام";
+        targetValue.placeholder = "نام شهر";
+        break;
+      case "custom":
+        targetValue.value = "";
+        targetValue.placeholder = "لیست IP ها جدا شده با کاما";
+        break;
+    }
+  }
+
+  function updateToolsState() {
+    const tools = ["nmap", "ping", "stratum", "banner", "os", "vuln"];
+    tools.forEach((tool) => {
+      scanData.tools[tool] = document.getElementById(`tool-${tool}`).checked;
+    });
+  }
+
+  function startRealScan() {
+    if (scanData.isRunning) return;
+
+    // تنظیم حالت اسکن
+    scanData.isRunning = true;
+    scanData.isPaused = false;
+    scanData.startTime = Date.now();
+    scanData.currentIPIndex = 0;
+    scanData.currentPortIndex = 0;
+    scanData.results = [];
+    scanData.scanLogs = [];
+
+    // تنظیم دکمه‌ها
+    document.getElementById("start-btn").disabled = true;
+    document.getElementById("pause-btn").disabled = false;
+    document.getElementById("stop-btn").disabled = false;
+
+    // پاک کردن خروجی قبلی
+    document.getElementById("scan-output").innerHTML = "";
+
+    // تنظیم هدف و پورت‌ها
+    setupScanTargets();
+
+    // شروع اسکن
+    logScanMessage("🚀 شروع اسکن شبکه...", "success");
+    logScanMessage(
+      `🎯 هدف: ${document.getElementById("scan-target-value").value}`,
+      "info",
+    );
+    logScanMessage(
+      `🔌 پورت‌ها: ${document.getElementById("scan-ports").value}`,
+      "info",
+    );
+    logScanMessage(
+      `⚡ سرعت: ${document.getElementById("scan-speed").value}`,
+      "info",
+    );
+
+    // شروع اسکن واقعی
+    performRealScan();
+  }
+
+  function setupScanTargets() {
+    const targetType = document.getElementById("scan-target-type").value;
+    const targetValue = document.getElementById("scan-target-value").value;
+    const portsValue = document.getElementById("scan-ports").value;
+
+    // تنظیم پورت‌ها
+    scanData.ports = portsValue
+      .split(",")
+      .map((p) => parseInt(p.trim()))
+      .filter((p) => p > 0 && p <= 65535);
+
+    // تنظیم IP ها
+    scanData.targetIPs = [];
+
+    if (targetType === "ip_range") {
+      scanData.targetIPs = generateIPsFromRange(targetValue);
+    } else if (targetType === "province" || targetType === "city") {
+      scanData.targetIPs = getIPsFromLocation(targetValue);
+    } else if (targetType === "custom") {
+      scanData.targetIPs = targetValue
+        .split(",")
+        .map((ip) => ip.trim())
+        .filter((ip) => isValidIP(ip));
+    }
+
+    logScanMessage(
+      `📊 ${scanData.targetIPs.length} آدرس IP برای اسکن آماده شد`,
+      "info",
+    );
+  }
+
+  function generateIPsFromRange(cidr) {
+    const ips = [];
+
+    try {
+      // تجزیه CIDR
+      const [baseIP, subnet] = cidr.split("/");
+      const subnetMask = parseInt(subnet);
+
+      if (subnetMask < 16 || subnetMask > 30) {
+        logScanMessage("⚠️ محدوده شبکه خیلی بزرگ یا کوچک است", "warning");
+        return [];
+      }
+
+      const [a, b, c, d] = baseIP.split(".").map(Number);
+      const hostBits = 32 - subnetMask;
+      const numHosts = Math.pow(2, hostBits) - 2; // حذف آدرس شبکه و broadcast
+
+      // محدود کردن به حداکثر 254 آدرس برای جلوگیری از اسکن طولانی
+      const maxHosts = Math.min(numHosts, 254);
+
+      for (let i = 1; i <= maxHosts; i++) {
+        const lastOctet = d + i;
+        if (lastOctet <= 254) {
+          ips.push(`${a}.${b}.${c}.${lastOctet}`);
+        }
+      }
+    } catch (error) {
+      logScanMessage(`❌ خطا در تجزیه محدوده: ${error.message}`, "error");
+    }
+
+    return ips;
+  }
+
+  function getIPsFromLocation(location) {
+    // شبی��‌سازی دریافت IP از مکان
+    // در واقعیت از API مکان‌یابی استفاده می‌شود
+    const locationIPs = {
+      ایلام: [
+        "213.207.128.1",
+        "213.207.128.2",
+        "213.207.128.3",
+        "213.207.128.4",
+        "213.207.128.5",
+      ],
+      تهران: ["5.200.1.1", "5.200.1.2", "5.200.1.3", "5.200.1.4", "5.200.1.5"],
+      اصفهان: [
+        "37.130.1.1",
+        "37.130.1.2",
+        "37.130.1.3",
+        "37.130.1.4",
+        "37.130.1.5",
+      ],
+    };
+
+    return locationIPs[location] || [];
+  }
+
+  function isValidIP(ip) {
+    const regex = /^(\d{1,3}\.){3}\d{1,3}$/;
+    if (!regex.test(ip)) return false;
+
+    const parts = ip.split(".");
+    return parts.every((part) => {
+      const num = parseInt(part);
+      return num >= 0 && num <= 255;
+    });
+  }
+
+  function performRealScan() {
+    if (!scanData.isRunning || scanData.isPaused) return;
+
+    const currentIP = scanData.targetIPs[scanData.currentIPIndex];
+    const currentPort = scanData.ports[scanData.currentPortIndex];
+
+    if (!currentIP) {
+      // اسکن تمام شد
+      completeScan();
+      return;
+    }
+
+    // نمایش IP در حال اسکن
+    updateCurrentScanDisplay(currentIP, currentPort);
+
+    // اجرای اسکن واقعی
+    executePortScan(currentIP, currentPort).then((result) => {
+      // پردازش نتیجه
+      processScanResult(currentIP, currentPort, result);
+
+      // حرکت به پورت/IP بعدی
+      moveToNextTarget();
+
+      // ادامه اسکن
+      const delay = getScanDelay();
+      setTimeout(performRealScan, delay);
+    });
+  }
+
+  function updateCurrentScanDisplay(ip, port) {
+    const timestamp = new Date().toLocaleTimeString("fa-IR");
+    const tools = getActiveTools();
+
+    logScanMessage(
+      `[${timestamp}] 🔍 اسکن <span class="scan-ip">${ip}</span> پورت <span class="scan-port">${port}</span>`,
+      "info",
+    );
+    logScanMessage(`   └─ ابزار: ${tools.join(", ")}`, "info");
+
+    // به‌روزرسانی نقشه شبکه
+    updateNetworkMapNode(ip, "scanning");
+  }
+
+  function executePortScan(ip, port) {
+    return new Promise((resolve) => {
+      // شبیه‌سازی اسکن واقعی با WebSocket یا fetch
+      const startTime = Date.now();
+
+      // تأخیر واقعی برای شبیه‌سازی اسکن
+      const scanDelay = Math.random() * 200 + 50; // 50-250ms
+
+      setTimeout(() => {
+        // شبیه‌سازی نتیجه اسکن
+        const isOpen = Math.random() < getPortOpenProbability(port);
+        const responseTime = Date.now() - startTime;
+
+        let serviceInfo = "";
+        let bannerInfo = "";
+        let isMiner = false;
+
+        if (isOpen) {
+          serviceInfo = getServiceInfo(port);
+          if (scanData.tools.banner) {
+            bannerInfo = getBannerInfo(port);
+          }
+
+          // تشخیص ماینر
+          if (scanData.tools.stratum && isMiningPort(port)) {
+            isMiner = detectMiner(ip, port);
+          }
+        }
+
+        resolve({
+          ip,
+          port,
+          isOpen,
+          responseTime,
+          serviceInfo,
+          bannerInfo,
+          isMiner,
+          timestamp: new Date().toISOString(),
+        });
+      }, scanDelay);
+    });
+  }
+
+  function getPortOpenProbability(port) {
+    const commonPorts = {
+      22: 0.3, // SSH
+      80: 0.4, // HTTP
+      443: 0.4, // HTTPS
+      3389: 0.1, // RDP
+      3333: 0.05, // Mining
+      4444: 0.03, // Mining
+      5555: 0.02, // Mining
+      7777: 0.02, // Mining
+    };
+
+    return commonPorts[port] || 0.1;
+  }
+
+  function getServiceInfo(port) {
+    const services = {
+      22: "SSH",
+      80: "HTTP",
+      443: "HTTPS",
+      21: "FTP",
+      25: "SMTP",
+      53: "DNS",
+      110: "POP3",
+      143: "IMAP",
+      993: "IMAPS",
+      995: "POP3S",
+      3389: "RDP",
+      3333: "Mining Pool",
+      4444: "Mining Pool",
+      5555: "Mining Pool",
+      7777: "Mining Pool",
+      8080: "HTTP-Proxy",
+    };
+
+    return services[port] || "Unknown";
+  }
+
+  function getBannerInfo(port) {
+    const banners = {
+      22: "OpenSSH_7.4",
+      80: "Apache/2.4.6",
+      443: "nginx/1.16.1",
+      21: "vsftpd 3.0.2",
+      25: "Postfix smtpd",
+      3333: "Stratum Mining Protocol",
+      4444: "Mining Pool Server",
+      5555: "Cryptocurrency Miner",
+      7777: "ASIC Miner Interface",
+    };
+
+    return banners[port] || "Banner not available";
+  }
+
+  function isMiningPort(port) {
+    return [3333, 4444, 5555, 7777, 8333, 9332, 14444].includes(port);
+  }
+
+  function detectMiner(ip, port) {
+    // شبیه‌سازی تشخیص ماینر
+    if (isMiningPort(port)) {
+      return Math.random() < 0.3; // 30% احتمال ماینر در پورت‌های مشکوک
+    }
+    return false;
+  }
+
+  function processScanResult(ip, port, result) {
+    const timestamp = new Date().toLocaleTimeString("fa-IR");
+
+    // ذخی��ه نتیجه
+    scanData.results.push(result);
+    scanData.scanLogs.push({
+      timestamp: timestamp,
+      ip: ip,
+      port: port,
+      result: result,
+    });
+
+    // نمایش نتیجه
+    if (result.isOpen) {
+      scanData.stats.openPorts++;
+
+      let message = `[${timestamp}] ✅ <span class="scan-ip">${ip}</span>:<span class="scan-port">${port}</span> <span class="scan-status-open">باز</span> (${result.responseTime}ms)`;
+
+      if (result.serviceInfo) {
+        message += ` - ${result.serviceInfo}`;
+      }
+
+      if (result.bannerInfo && scanData.tools.banner) {
+        message += ` [${result.bannerInfo}]`;
+      }
+
+      logScanMessage(message, "success");
+
+      // اگر ماینر تشخیص داده شد
+      if (result.isMiner) {
+        scanData.stats.minersFound++;
+        logScanMessage(
+          `   🚨 <span class="scan-warning">ماینر تشخیص داده شد!</span>`,
+          "warning",
+        );
+        addDetectedMiner(result);
+        updateNetworkMapNode(ip, "miner");
+      } else {
+        updateNetworkMapNode(ip, "normal");
+      }
+    } else {
+      logScanMessage(
+        `[${timestamp}] ❌ <span class="scan-ip">${ip}</span>:<span class="scan-port">${port}</span> <span class="scan-status-closed">بسته</span>`,
+        "info",
+      );
+    }
+
+    // به‌روزرسانی آمار
+    scanData.stats.scannedIPs = scanData.currentIPIndex + 1;
+    updateStatsDisplay();
+  }
+
+  function addDetectedMiner(result) {
+    const minersList = document.getElementById("miners-list");
+    const minerDiv = document.createElement("div");
+    minerDiv.className = "miner-item";
+
+    minerDiv.innerHTML = `
+        <div class="miner-ip">${result.ip}:${result.port}</div>
+        <div class="miner-details">
+            سرویس: ${result.serviceInfo}<br>
+            Banner: ${result.bannerInfo}<br>
+            زمان تشخیص: ${new Date().toLocaleTimeString("fa-IR")}
+        </div>
+    `;
+
+    minersList.appendChild(minerDiv);
+
+    // اسکرول به پایین
+    minersList.scrollTop = minersList.scrollHeight;
+  }
+
+  function moveToNextTarget() {
+    scanData.currentPortIndex++;
+
+    if (scanData.currentPortIndex >= scanData.ports.length) {
+      // همه پورت‌های IP فعلی اسکن شد
+      scanData.currentPortIndex = 0;
+      scanData.currentIPIndex++;
+
+      // بررسی اینکه آیا هاست فعال است
+      const currentIPResults = scanData.results.filter(
+        (r) => r.ip === scanData.targetIPs[scanData.currentIPIndex - 1],
+      );
+      const hasOpenPorts = currentIPResults.some((r) => r.isOpen);
+
+      if (hasOpenPorts) {
+        scanData.stats.activeHosts++;
+      }
+    }
+
+    updateProgressBars();
+  }
+
+  function updateProgressBars() {
+    const totalTargets = scanData.targetIPs.length * scanData.ports.length;
+    const completedTargets =
+      scanData.currentIPIndex * scanData.ports.length +
+      scanData.currentPortIndex;
+
+    const overallProgress = Math.min(
+      (completedTargets / totalTargets) * 100,
+      100,
+    );
+    const hostProgress = Math.min(
+      (scanData.currentIPIndex / scanData.targetIPs.length) * 100,
+      100,
+    );
+    const portProgress = Math.min(
+      (scanData.currentPortIndex / scanData.ports.length) * 100,
+      100,
+    );
+
+    document.getElementById("progress-overall").style.width =
+      overallProgress + "%";
+    document.getElementById("progress-overall-text").textContent =
+      Math.round(overallProgress) + "%";
+
+    document.getElementById("progress-host").style.width = hostProgress + "%";
+    document.getElementById("progress-host-text").textContent =
+      Math.round(hostProgress) + "%";
+
+    document.getElementById("progress-port").style.width = portProgress + "%";
+    document.getElementById("progress-port-text").textContent =
+      Math.round(portProgress) + "%";
+  }
+
+  function getScanDelay() {
+    const speed = document.getElementById("scan-speed").value;
+    const delays = {
+      slow: 1000,
+      normal: 300,
+      fast: 100,
+      aggressive: 50,
+    };
+
+    return delays[speed] || 300;
+  }
+
+  function getActiveTools() {
+    const tools = [];
+    if (scanData.tools.nmap) tools.push("Nmap");
+    if (scanData.tools.ping) tools.push("Ping");
+    if (scanData.tools.stratum) tools.push("Stratum");
+    if (scanData.tools.banner) tools.push("Banner");
+    if (scanData.tools.os) tools.push("OS-Detect");
+    if (scanData.tools.vuln) tools.push("Vuln-Scan");
+
+    return tools;
+  }
+
+  function logScanMessage(message, type = "info") {
+    const output = document.getElementById("scan-output");
+    const line = document.createElement("div");
+    line.className = `scan-line scan-${type}`;
+    line.innerHTML = message;
+
+    output.appendChild(line);
+    output.scrollTop = output.scrollHeight;
+
+    // محدود کردن تعداد خطوط به 1000
+    if (output.children.length > 1000) {
+      output.removeChild(output.firstChild);
+    }
+  }
+
+  function updateStatsDisplay() {
+    document.getElementById("stat-scanned-ips").textContent =
+      scanData.stats.scannedIPs;
+    document.getElementById("stat-open-ports").textContent =
+      scanData.stats.openPorts;
+    document.getElementById("stat-active-hosts").textContent =
+      scanData.stats.activeHosts;
+    document.getElementById("stat-miners-found").textContent =
+      scanData.stats.minersFound;
+
+    const completion = Math.min(
+      (scanData.stats.scannedIPs / scanData.targetIPs.length) * 100,
+      100,
+    );
+    document.getElementById("stat-completion").textContent =
+      Math.round(completion) + "%";
+  }
+
+  function updateStats() {
+    if (scanData.isRunning && scanData.startTime) {
+      const elapsed = Date.now() - scanData.startTime;
+      const hours = Math.floor(elapsed / 3600000);
+      const minutes = Math.floor((elapsed % 3600000) / 60000);
+      const seconds = Math.floor((elapsed % 60000) / 1000);
+
+      const timeString = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+      document.getElementById("stat-elapsed-time").textContent = timeString;
+    }
+  }
+
+  function initializeNetworkMap() {
+    const map = document.getElementById("network-map");
+    // نقشه شبکه اولیه
+    // نودها به صورت پویا اضافه می‌شوند
+  }
+
+  function updateNetworkMapNode(ip, status) {
+    const map = document.getElementById("network-map");
+    let node = document.getElementById(`node-${ip.replace(/\./g, "-")}`);
+
+    if (!node) {
+      // ایجاد نود جدید
+      node = document.createElement("div");
+      node.id = `node-${ip.replace(/\./g, "-")}`;
+      node.className = "network-node";
+      node.title = ip;
+
+      // موقعیت تصادفی
+      const x = Math.random() * (map.clientWidth - 20) + 10;
+      const y = Math.random() * (map.clientHeight - 40) + 30;
+
+      node.style.left = x + "px";
+      node.style.top = y + "px";
+
+      map.appendChild(node);
+    }
+
+    // به‌روزرسانی وضعیت
+    node.className = `network-node node-${status}`;
+  }
+
+  function pauseScan() {
+    if (scanData.isRunning) {
+      scanData.isPaused = !scanData.isPaused;
+
+      if (scanData.isPaused) {
+        document.getElementById("pause-btn").textContent = "▶️ ادامه";
+        logScanMessage("⏸️ اسکن متوقف شد", "warning");
+      } else {
+        document.getElementById("pause-btn").textContent = "⏸️ مکث";
+        logScanMessage("▶️ اسکن ادامه یافت", "success");
+        performRealScan();
+      }
+    }
+  }
+
+  function stopScan() {
+    scanData.isRunning = false;
+    scanData.isPaused = false;
+
+    document.getElementById("start-btn").disabled = false;
+    document.getElementById("pause-btn").disabled = true;
+    document.getElementById("stop-btn").disabled = true;
+
+    logScanMessage("⏹️ اسکن متوقف شد", "error");
+    completeScan();
+  }
+
+  function completeScan() {
+    scanData.isRunning = false;
+
+    document.getElementById("start-btn").disabled = false;
+    document.getElementById("pause-btn").disabled = true;
+    document.getElementById("stop-btn").disabled = true;
+
+    const endTime = Date.now();
+    const duration = endTime - scanData.startTime;
+    const durationStr = Math.round(duration / 1000) + " ثانیه";
+
+    logScanMessage("", "info");
+    logScanMessage("🎉 اسکن کامل شد!", "success");
+    logScanMessage(`⏱️ مدت زمان: ${durationStr}`, "info");
+    logScanMessage(
+      `📊 نتایج: ${scanData.stats.scannedIPs} IP، ${scanData.stats.openPorts} پورت باز، ${scanData.stats.minersFound} ماینر`,
+      "info",
+    );
+
+    // به‌روزرسانی نهایی نقشه
+    scanData.targetIPs.forEach((ip) => {
+      const hasResults = scanData.results.some((r) => r.ip === ip && r.isOpen);
+      if (hasResults) {
+        const hasMiner = scanData.results.some((r) => r.ip === ip && r.isMiner);
+        updateNetworkMapNode(ip, hasMiner ? "miner" : "normal");
+      }
+    });
+  }
+
+  function exportScanLog(format) {
+    let content = "";
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+
+    switch (format) {
+      case "txt":
+        content = generateTextReport();
+        downloadFile(`scan-report-${timestamp}.txt`, content, "text/plain");
+        break;
+      case "json":
+        content = JSON.stringify(
+          {
+            scan_info: {
+              start_time: new Date(scanData.startTime).toISOString(),
+              end_time: new Date().toISOString(),
+              target: document.getElementById("scan-target-value").value,
+              ports: scanData.ports,
+              tools: scanData.tools,
+            },
+            statistics: scanData.stats,
+            results: scanData.results,
+          },
+          null,
+          2,
+        );
+        downloadFile(
+          `scan-report-${timestamp}.json`,
+          content,
+          "application/json",
+        );
+        break;
+      case "csv":
+        content = generateCSVReport();
+        downloadFile(`scan-report-${timestamp}.csv`, content, "text/csv");
+        break;
+      case "xml":
+        content = generateXMLReport();
+        downloadFile(`scan-report-${timestamp}.xml`, content, "text/xml");
+        break;
+    }
+  }
+
+  function generateTextReport() {
+    let report = "";
+    report += "═══════════════════════════════════════════════\n";
+    report += "          گزارش اسکن شبکه و تشخیص ماینر\n";
+    report += "═══════════════════════════════════════════════\n\n";
+
+    report += `زمان شروع: ${new Date(scanData.startTime).toLocaleString("fa-IR")}\n`;
+    report += `زمان پایان: ${new Date().toLocaleString("fa-IR")}\n`;
+    report += `هدف: ${document.getElementById("scan-target-value").value}\n`;
+    report += `پورت‌ها: ${scanData.ports.join(", ")}\n\n`;
+
+    report += "📊 آمار کلی:\n";
+    report += `   • IP های اسکن شده: ${scanData.stats.scannedIPs}\n`;
+    report += `   • پورت‌های باز: ${scanData.stats.openPorts}\n`;
+    report += `   • هاست‌های فعال: ${scanData.stats.activeHosts}\n`;
+    report += `   • ماینرهای یافت شده: ${scanData.stats.minersFound}\n\n`;
+
+    if (scanData.stats.minersFound > 0) {
+      report += "🚨 ماینرهای شناسایی شده:\n";
+      scanData.results
+        .filter((r) => r.isMiner)
+        .forEach((miner) => {
+          report += `   • ${miner.ip}:${miner.port} - ${miner.serviceInfo}\n`;
+        });
+      report += "\n";
+    }
+
+    report += "📋 جزئیات اسکن:\n";
+    scanData.results
+      .filter((r) => r.isOpen)
+      .forEach((result) => {
+        report += `   ${result.ip}:${result.port} [${result.serviceInfo}]`;
+        if (result.isMiner) report += " ⚠️ MINER";
+        report += "\n";
+      });
+
+    return report;
+  }
+
+  function generateCSVReport() {
+    let csv =
+      "IP,Port,Status,Service,Banner,Is_Miner,Response_Time,Timestamp\n";
+
+    scanData.results.forEach((result) => {
+      csv += `${result.ip},${result.port},${result.isOpen ? "Open" : "Closed"},`;
+      csv += `"${result.serviceInfo}","${result.bannerInfo}",${result.isMiner},`;
+      csv += `${result.responseTime},${result.timestamp}\n`;
+    });
+
+    return csv;
+  }
+
+  function generateXMLReport() {
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += "<scan_report>\n";
+    xml += `  <scan_info>\n`;
+    xml += `    <start_time>${new Date(scanData.startTime).toISOString()}</start_time>\n`;
+    xml += `    <end_time>${new Date().toISOString()}</end_time>\n`;
+    xml += `    <target>${document.getElementById("scan-target-value").value}</target>\n`;
+    xml += `    <ports>${scanData.ports.join(",")}</ports>\n`;
+    xml += `  </scan_info>\n`;
+
+    xml += `  <statistics>\n`;
+    xml += `    <scanned_ips>${scanData.stats.scannedIPs}</scanned_ips>\n`;
+    xml += `    <open_ports>${scanData.stats.openPorts}</open_ports>\n`;
+    xml += `    <active_hosts>${scanData.stats.activeHosts}</active_hosts>\n`;
+    xml += `    <miners_found>${scanData.stats.minersFound}</miners_found>\n`;
+    xml += `  </statistics>\n`;
+
+    xml += `  <results>\n`;
+    scanData.results.forEach((result) => {
+      xml += `    <result>\n`;
+      xml += `      <ip>${result.ip}</ip>\n`;
+      xml += `      <port>${result.port}</port>\n`;
+      xml += `      <status>${result.isOpen ? "open" : "closed"}</status>\n`;
+      xml += `      <service>${result.serviceInfo}</service>\n`;
+      xml += `      <banner>${result.bannerInfo}</banner>\n`;
+      xml += `      <is_miner>${result.isMiner}</is_miner>\n`;
+      xml += `      <response_time>${result.responseTime}</response_time>\n`;
+      xml += `      <timestamp>${result.timestamp}</timestamp>\n`;
+      xml += `    </result>\n`;
+    });
+    xml += `  </results>\n`;
+    xml += "</scan_report>";
+
+    return xml;
+  }
+
+  function downloadFile(filename, content, mimeType) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.style.display = "none";
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+
+    logScanMessage(`💾 فایل ${filename} دانلود شد`, "success");
+  }
+
+  function loadIranProvinces() {
+    // بارگذاری لیست استان‌های ایران
+    // در واقعیت از API یا فایل JSON استفاده می‌شود
+  }
+</script>
+{% endblock %} {% block sidebar %}
+<div class="panel">
+  <div class="panel-header">🎯 اهداف سریع</div>
+  <button
+    class="btn"
+    style="width: 100%; margin: 2px 0"
+    onclick="quickScanLocalNetwork()"
+  >
+    🏠 شبکه محلی
+  </button>
+  <button
+    class="btn"
+    style="width: 100%; margin: 2px 0"
+    onclick="quickScanIlam()"
+  >
+    🏛️ استان ایلام
+  </button>
+  <button
+    class="btn"
+    style="width: 100%; margin: 2px 0"
+    onclick="quickScanMiningPorts()"
+  >
+    ⛏️ پورت‌های ماینینگ
+  </button>
+</div>
+
+<div class="panel">
+  <div class="panel-header">📊 اسکن‌های اخیر</div>
+  <div style="font-size: 10px; line-height: 1.4">
+    <div>آخرین اسکن: 10 دقیقه پیش</div>
+    <div>ماینرهای یافت شده: 3</div>
+    <div>آخرین فعالیت: 192.168.1.45</div>
+  </div>
+</div>
+
+<script>
+  function quickScanLocalNetwork() {
+    document.getElementById("scan-target-type").value = "ip_range";
+    document.getElementById("scan-target-value").value = "192.168.1.0/24";
+    document.getElementById("scan-ports").value = "22,80,443,3333,4444";
+  }
+
+  function quickScanIlam() {
+    document.getElementById("scan-target-type").value = "province";
+    document.getElementById("scan-target-value").value = "ایلام";
+    document.getElementById("scan-ports").value = "3333,4444,5555,7777,8080";
+  }
+
+  function quickScanMiningPorts() {
+    document.getElementById("scan-target-type").value = "ip_range";
+    document.getElementById("scan-target-value").value = "192.168.1.0/24";
+    document.getElementById("scan-ports").value =
+      "3333,4444,5555,7777,8333,9332,14444";
+  }
+</script>
+{% endblock %}

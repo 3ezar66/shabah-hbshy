@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>بارگذاری سیستم تشخیص ماینر</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Vazir:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Vazir", sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .underwater-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          180deg,
+          rgba(135, 206, 250, 0.8) 0%,
+          rgba(70, 130, 180, 0.9) 30%,
+          rgba(25, 25, 112, 0.95) 70%,
+          rgba(0, 0, 139, 1) 100%
+        );
+        overflow: hidden;
+      }
+
+      /* افکت امواج آب */
+      .water-surface {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 200%;
+        height: 120px;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.3) 0%,
+          rgba(135, 206, 250, 0.4) 25%,
+          rgba(255, 255, 255, 0.3) 50%,
+          rgba(135, 206, 250, 0.4) 75%,
+          rgba(255, 255, 255, 0.3) 100%
+        );
+        animation: wave 6s ease-in-out infinite;
+        filter: blur(1px);
+      }
+
+      @keyframes wave {
+        0%,
+        100% {
+          transform: translateX(-50%) translateY(0px) scaleY(1);
+        }
+        25% {
+          transform: translateX(-45%) translateY(-5px) scaleY(1.1);
+        }
+        50% {
+          transform: translateX(-50%) translateY(-8px) scaleY(0.9);
+        }
+        75% {
+          transform: translateX(-55%) translateY(-3px) scaleY(1.05);
+        }
+      }
+
+      /* حباب‌های آب */
+      .bubble {
+        position: absolute;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle at 30% 30%,
+          rgba(255, 255, 255, 0.8),
+          rgba(255, 255, 255, 0.4),
+          rgba(135, 206, 250, 0.2)
+        );
+        opacity: 0.7;
+        animation: bubble-rise linear infinite;
+      }
+
+      .bubble:nth-child(1) {
+        left: 10%;
+        width: 20px;
+        height: 20px;
+        animation-duration: 8s;
+        animation-delay: 0s;
+      }
+      .bubble:nth-child(2) {
+        left: 20%;
+        width: 15px;
+        height: 15px;
+        animation-duration: 6s;
+        animation-delay: 1s;
+      }
+      .bubble:nth-child(3) {
+        left: 35%;
+        width: 25px;
+        height: 25px;
+        animation-duration: 10s;
+        animation-delay: 2s;
+      }
+      .bubble:nth-child(4) {
+        left: 50%;
+        width: 12px;
+        height: 12px;
+        animation-duration: 7s;
+        animation-delay: 0.5s;
+      }
+      .bubble:nth-child(5) {
+        left: 65%;
+        width: 18px;
+        height: 18px;
+        animation-duration: 9s;
+        animation-delay: 3s;
+      }
+      .bubble:nth-child(6) {
+        left: 80%;
+        width: 22px;
+        height: 22px;
+        animation-duration: 8s;
+        animation-delay: 1.5s;
+      }
+      .bubble:nth-child(7) {
+        left: 90%;
+        width: 14px;
+        height: 14px;
+        animation-duration: 6s;
+        animation-delay: 2.5s;
+      }
+
+      @keyframes bubble-rise {
+        from {
+          bottom: -50px;
+          transform: translateX(0) rotate(0deg);
+          opacity: 0;
+        }
+        10% {
+          opacity: 0.7;
+        }
+        90% {
+          opacity: 0.7;
+        }
+        to {
+          bottom: 100vh;
+          transform: translateX(20px) rotate(360deg);
+          opacity: 0;
+        }
+      }
+
+      /* ذرات شناور */
+      .floating-particle {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 50%;
+        animation: float linear infinite;
+      }
+
+      .floating-particle:nth-child(1) {
+        left: 15%;
+        width: 3px;
+        height: 3px;
+        animation-duration: 12s;
+        animation-delay: 0s;
+      }
+      .floating-particle:nth-child(2) {
+        left: 25%;
+        width: 2px;
+        height: 2px;
+        animation-duration: 15s;
+        animation-delay: 2s;
+      }
+      .floating-particle:nth-child(3) {
+        left: 45%;
+        width: 4px;
+        height: 4px;
+        animation-duration: 10s;
+        animation-delay: 1s;
+      }
+      .floating-particle:nth-child(4) {
+        left: 60%;
+        width: 3px;
+        height: 3px;
+        animation-duration: 14s;
+        animation-delay: 3s;
+      }
+      .floating-particle:nth-child(5) {
+        left: 75%;
+        width: 2px;
+        height: 2px;
+        animation-duration: 11s;
+        animation-delay: 0.5s;
+      }
+      .floating-particle:nth-child(6) {
+        left: 85%;
+        width: 3px;
+        height: 3px;
+        animation-duration: 13s;
+        animation-delay: 2.5s;
+      }
+
+      @keyframes float {
+        from {
+          bottom: -10px;
+          transform: translateX(0px) translateY(0px);
+          opacity: 0;
+        }
+        10% {
+          opacity: 0.8;
+        }
+        50% {
+          transform: translateX(30px) translateY(-20px);
+          opacity: 0.8;
+        }
+        90% {
+          opacity: 0.8;
+        }
+        to {
+          bottom: 100vh;
+          transform: translateX(-20px) translateY(-40px);
+          opacity: 0;
+        }
+      }
+
+      /* افکت نور زیر آب */
+      .light-rays {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          45deg,
+          transparent 30%,
+          rgba(255, 255, 255, 0.1) 32%,
+          rgba(255, 255, 255, 0.2) 34%,
+          rgba(255, 255, 255, 0.1) 36%,
+          transparent 38%,
+          transparent 45%,
+          rgba(255, 255, 255, 0.1) 47%,
+          rgba(255, 255, 255, 0.15) 49%,
+          rgba(255, 255, 255, 0.1) 51%,
+          transparent 53%
+        );
+        animation: light-movement 8s ease-in-out infinite;
+        pointer-events: none;
+      }
+
+      @keyframes light-movement {
+        0%,
+        100% {
+          transform: translateX(-100px) translateY(0px) rotate(20deg);
+          opacity: 0.3;
+        }
+        50% {
+          transform: translateX(100px) translateY(-50px) rotate(25deg);
+          opacity: 0.6;
+        }
+      }
+
+      /* محتوای مرکزی */
+      .loading-content {
+        position: relative;
+        z-index: 10;
+        text-align: center;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        padding: 20px;
+      }
+
+      /* لوگوی مرکزی */
+      .main-logo {
+        position: relative;
+        margin-bottom: 40px;
+      }
+
+      .logo-shield {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(
+          135deg,
+          #00d4ff 0%,
+          #0099cc 50%,
+          #006699 100%
+        );
+        border-radius: 60px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+          0 0 30px rgba(0, 212, 255, 0.5),
+          inset 0 0 20px rgba(255, 255, 255, 0.2);
+        animation: logo-pulse 3s ease-in-out infinite;
+      }
+
+      .logo-shield::before {
+        content: "🛡️";
+        font-size: 48px;
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+      }
+
+      .logo-shield::after {
+        content: "";
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        border: 2px solid rgba(0, 212, 255, 0.4);
+        border-radius: 65px;
+        animation: logo-ring 2s linear infinite;
+      }
+
+      @keyframes logo-pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+        }
+        50% {
+          transform: scale(1.05);
+          box-shadow: 0 0 40px rgba(0, 212, 255, 0.8);
+        }
+      }
+
+      @keyframes logo-ring {
+        0% {
+          transform: rotate(0deg) scale(1);
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+        100% {
+          transform: rotate(360deg) scale(1.1);
+          opacity: 1;
+        }
+      }
+
+      /* متن اصلی */
+      .main-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        animation: text-glow 2s ease-in-out infinite alternate;
+      }
+
+      .sub-title {
+        font-size: 16px;
+        margin-bottom: 30px;
+        opacity: 0.9;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+      }
+
+      @keyframes text-glow {
+        from {
+          text-shadow:
+            2px 2px 4px rgba(0, 0, 0, 0.5),
+            0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        to {
+          text-shadow:
+            2px 2px 4px rgba(0, 0, 0, 0.5),
+            0 0 20px rgba(255, 255, 255, 0.6);
+        }
+      }
+
+      /* نوار پیشرفت */
+      .progress-container {
+        width: 300px;
+        margin: 20px 0;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          #00d4ff 0%,
+          #0099cc 50%,
+          #00d4ff 100%
+        );
+        border-radius: 6px;
+        width: 0%;
+        animation: progress-fill 7s ease-out forwards;
+        box-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+      }
+
+      @keyframes progress-fill {
+        0% {
+          width: 0%;
+        }
+        20% {
+          width: 25%;
+        }
+        40% {
+          width: 50%;
+        }
+        60% {
+          width: 75%;
+        }
+        80% {
+          width: 90%;
+        }
+        100% {
+          width: 100%;
+        }
+      }
+
+      .progress-text {
+        margin-top: 10px;
+        font-size: 14px;
+        opacity: 0.8;
+      }
+
+      /* متن در حال تایپ */
+      .typing-text {
+        margin-top: 20px;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        color: #00ff88;
+        text-shadow: 0 0 5px rgba(0, 255, 136, 0.5);
+        direction: ltr;
+        text-align: left;
+        width: 400px;
+        height: 60px;
+        overflow: hidden;
+      }
+
+      .typing-line {
+        opacity: 0;
+        animation: type-in 1s ease forwards;
+      }
+
+      .typing-line:nth-child(1) {
+        animation-delay: 1s;
+      }
+      .typing-line:nth-child(2) {
+        animation-delay: 2.5s;
+      }
+      .typing-line:nth-child(3) {
+        animation-delay: 4s;
+      }
+      .typing-line:nth-child(4) {
+        animation-delay: 5.5s;
+      }
+
+      @keyframes type-in {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* کریدیت توسعه‌دهنده */
+      .developer-credit {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 12px;
+        opacity: 0.7;
+        text-align: center;
+      }
+
+      /* افکت‌های اضافی */
+      .water-distortion {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle at 50% 30%,
+          rgba(255, 255, 255, 0.1) 0%,
+          transparent 30%
+        );
+        animation: distortion 4s ease-in-out infinite;
+        pointer-events: none;
+      }
+
+      @keyframes distortion {
+        0%,
+        100% {
+          transform: scale(1) translateY(0px);
+          opacity: 0.3;
+        }
+        50% {
+          transform: scale(1.1) translateY(-10px);
+          opacity: 0.1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="underwater-container">
+      <!-- سطح آب -->
+      <div class="water-surface"></div>
+
+      <!-- حباب‌های آب -->
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+
+      <!-- ذرات شناور -->
+      <div class="floating-particle"></div>
+      <div class="floating-particle"></div>
+      <div class="floating-particle"></div>
+      <div class="floating-particle"></div>
+      <div class="floating-particle"></div>
+      <div class="floating-particle"></div>
+
+      <!-- افکت نور زیر آب -->
+      <div class="light-rays"></div>
+
+      <!-- افکت اعوجاج آب -->
+      <div class="water-distortion"></div>
+
+      <!-- محتوای اصلی -->
+      <div class="loading-content">
+        <!-- لوگوی مرکزی -->
+        <div class="main-logo">
+          <div class="logo-shield"></div>
+        </div>
+
+        <!-- متن اصلی -->
+        <h1 class="main-title">سیستم تشخیص ماینر رمزارز</h1>
+        <p class="sub-title">استان ایلام - نسخه پیشرفته 2.0</p>
+
+        <!-- نوار پیشرفت -->
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+          <div class="progress-text" id="progress-text">
+            در حال بارگذاری سیستم...
+          </div>
+        </div>
+
+        <!-- متن تایپ شونده -->
+        <div class="typing-text">
+          <div class="typing-line">Initializing Network Scanner Module...</div>
+          <div class="typing-line">Loading RF Detection Engine...</div>
+          <div class="typing-line">Starting AI Analysis Components...</div>
+          <div class="typing-line">System Ready - Welcome!</div>
+        </div>
+      </div>
+
+      <!-- کریدیت توسعه‌دهنده -->
+      <div class="developer-credit">
+        طراحی و توسعه: عرفان رجبی (Erfan Rajabi)<br />
+        سیستم تشخیص و مانیتورینگ ماینر - استان ایلام
+      </div>
+    </div>
+
+    <script>
+      // مدیریت متن پیشرفت
+      const progressTexts = [
+        "در حال بارگذاری سیستم...",
+        "راه‌اندازی ماژول‌های شبکه...",
+        "بارگذاری موتور تشخیص RF...",
+        "آماده‌سازی هوش مصنوعی...",
+        "اتصال به پایگاه داده...",
+        "بررسی امنیت سیستم...",
+        "تنظیم رابط کاربری...",
+        "سیستم آماده است!",
+      ];
+
+      let progressIndex = 0;
+      const progressElement = document.getElementById("progress-text");
+
+      function updateProgress() {
+        if (progressIndex < progressTexts.length) {
+          progressElement.textContent = progressTexts[progressIndex];
+          progressIndex++;
+          setTimeout(updateProgress, 1000);
+        }
+      }
+
+      // شروع به‌روزرسانی متن پیشرفت
+      setTimeout(updateProgress, 500);
+
+      // افکت صدای آب (اختیاری)
+      function playWaterSound() {
+        // در صورت وجود فایل صوتی
+        // const audio = new Audio('/static/sounds/water_bubbles.mp3');
+        // audio.volume = 0.3;
+        // audio.loop = true;
+        // audio.play();
+      }
+
+      // ریدایرکت پس از 7 ثانیه
+      setTimeout(function () {
+        window.location.href = "/login";
+      }, 7000);
+
+      // افکت‌های اضافی موس
+      document.addEventListener("mousemove", function (e) {
+        const x = e.clientX / window.innerWidth;
+        const y = e.clientY / window.innerHeight;
+
+        // حرکت آرام امواج با موس
+        const surface = document.querySelector(".water-surface");
+        const intensity = Math.sin(x * Math.PI) * 5;
+        surface.style.transform = `translateX(-50%) translateY(${intensity}px)`;
+      });
+
+      // ایجاد حباب‌های اضافی با کلیک
+      document.addEventListener("click", function (e) {
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.style.left = e.clientX + "px";
+        bubble.style.bottom = "0px";
+        bubble.style.width = Math.random() * 20 + 10 + "px";
+        bubble.style.height = bubble.style.width;
+        bubble.style.animationDuration = Math.random() * 3 + 5 + "s";
+
+        document.querySelector(".underwater-container").appendChild(bubble);
+
+        // حذف حباب پس از انیمیشن
+        setTimeout(() => {
+          if (bubble.parentNode) {
+            bubble.parentNode.removeChild(bubble);
+          }
+        }, 8000);
+      });
+    </script>
+  </body>
+</html>

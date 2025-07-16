@@ -1,0 +1,568 @@
+{% extends "shell_modern.html" %} {% block title %}داشبورد - سیستم شناسایی
+ماینر{% endblock %} {% block content %}
+<div class="panel">
+  <div class="panel-header">
+    <i class="fas fa-tachometer-alt icon-16"></i> داشبورد سیستم شناسایی ماینر
+  </div>
+
+  <!-- Statistics Panels -->
+  <div style="display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap">
+    <div class="stat-panel">
+      <div class="stat-icon">
+        <i class="fas fa-microchip" style="color: #000080"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-number">{{ total_miners }}</div>
+        <div class="stat-label">کل ماینرهای یافت شده</div>
+      </div>
+    </div>
+
+    <div class="stat-panel">
+      <div class="stat-icon">
+        <i class="fas fa-power-off" style="color: #008000"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-number">{{ active_miners }}</div>
+        <div class="stat-label">ماینرهای فعال</div>
+      </div>
+    </div>
+
+    <div class="stat-panel">
+      <div class="stat-icon">
+        <i class="fas fa-chart-line" style="color: #800080"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-number" id="cpu-usage">0%</div>
+        <div class="stat-label">مصرف پردازنده</div>
+      </div>
+    </div>
+
+    <div class="stat-panel">
+      <div class="stat-icon">
+        <i class="fas fa-memory" style="color: #808000"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-number" id="memory-usage">0%</div>
+        <div class="stat-label">مصرف حافظه</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Panels -->
+  <div style="display: flex; gap: 8px; margin: 8px 0">
+    <!-- Threat Level Panel -->
+    <div class="panel" style="flex: 1">
+      <div class="panel-header">
+        <i class="fas fa-exclamation-triangle icon-16"></i> سطح تهدیدات
+      </div>
+      <div style="padding: 8px">
+        <div class="threat-grid">
+          {% for threat in threat_stats %}
+          <div class="threat-item threat-{{ threat.threat_level }}">
+            <div class="threat-label">
+              {% if threat.threat_level == 'critical' %}بحرانی {% elif
+              threat.threat_level == 'high' %}بالا {% elif threat.threat_level
+              == 'medium' %}متوسط {% else %}پایین{% endif %}
+            </div>
+            <div class="threat-count">{{ threat.count }}</div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Simple ASCII Chart -->
+        <div class="ascii-chart">
+          <div class="chart-title">نمودار توزیع تهدیدات:</div>
+          {% for threat in threat_stats %}
+          <div class="chart-bar">
+            <span class="bar-label">
+              {% if threat.threat_level == 'critical' %}بحرانی {% elif
+              threat.threat_level == 'high' %}بالا {% elif threat.threat_level
+              == 'medium' %}متوسط {% else %}پایین{% endif %}:
+            </span>
+            <span class="bar-visual">
+              {% for i in range(threat.count) %}█{% endfor %}
+            </span>
+            <span class="bar-count">{{ threat.count }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Scans Panel -->
+    <div class="panel" style="flex: 1">
+      <div class="panel-header">
+        <i class="fas fa-clock icon-16"></i> اسکن‌های ��خیر
+      </div>
+      <div class="listview">
+        <div class="listview-header">
+          <div style="display: flex">
+            <span style="flex: 1">نوع اسکن</span>
+            <span style="width: 100px">هدف</span>
+            <span style="width: 80px">وضعیت</span>
+            <span style="width: 100px">تاریخ</span>
+          </div>
+        </div>
+
+        {% if recent_scans %} {% for scan in recent_scans %}
+        <div
+          class="listview-item"
+          onclick="window.location.href='/scan_progress/{{ scan.session_id }}'"
+        >
+          <span style="flex: 1">{{ scan.scan_type }}</span>
+          <span
+            style="
+              width: 100px;
+              font-family: &quot;Courier New&quot;, monospace;
+              font-size: 10px;
+            "
+            >{{ scan.target_range[:15] }}...</span
+          >
+          <span style="width: 80px">
+            {% if scan.status == 'completed' %}
+            <span class="status-badge completed">تکمیل</span>
+            {% elif scan.status == 'running' %}
+            <span class="status-badge running">اجرا</span>
+            {% else %}
+            <span class="status-badge failed">خطا</span>
+            {% endif %}
+          </span>
+          <span style="width: 100px; font-size: 10px"
+            >{{ scan.start_time.strftime('%m-%d %H:%M') }}</span
+          >
+        </div>
+        {% endfor %} {% else %}
+        <div class="listview-item" style="color: #808080; font-style: italic">
+          هیچ اسکن اخیری وجود ندارد
+        </div>
+        {% endif %}
+      </div>
+
+      <div style="padding: 4px; text-align: center">
+        <button
+          class="btn-classic"
+          onclick="window.location.href='/scan_history'"
+        >
+          <i class="fas fa-history icon-16"></i> مشاهده همه
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Network Map Panel -->
+  <div class="panel">
+    <div class="panel-header">
+      <i class="fas fa-network-wired icon-16"></i> نقشه شبکه و ماینرهای شناسایی
+      شده
+    </div>
+    <div style="padding: 8px">
+      <div class="network-map">
+        <div class="map-legend">
+          <span class="legend-item">
+            <span class="legend-color" style="background: #ff0000"></span> ماینر
+            بحرانی
+          </span>
+          <span class="legend-item">
+            <span class="legend-color" style="background: #ff8000"></span> ماینر
+            خطرناک
+          </span>
+          <span class="legend-item">
+            <span class="legend-color" style="background: #ffff00"></span> ماینر
+            متوسط
+          </span>
+          <span class="legend-item">
+            <span class="legend-color" style="background: #008000"></span>
+            دستگاه عادی
+          </span>
+        </div>
+
+        <div class="ascii-network-map">
+          <pre
+            style="
+              font-family: &quot;Courier New&quot;, monospace;
+              font-size: 10px;
+              margin: 0;
+              direction: ltr;
+            "
+          >
+    Router (192.168.1.1)
+           |
+    ┌──────┴──────┐
+    │   Switch    │
+    └──────┬──────┘
+           │
+    ┌──────┼──────┬──────┬──────┐
+    │      │      │      │      │
+  [🔴]   [🟢]   [🟡]   [🟢]   [🔴]
+ .100   .101   .102   .103   .104
+Miner  Host   Miner  Host   Miner
+</pre
+          >
+        </div>
+
+        <div class="network-stats">
+          <div class="network-stat">
+            <strong>شبکه فعلی:</strong> 192.168.1.0/24
+          </div>
+          <div class="network-stat"><strong>دستگاه‌های فعال:</strong> 24</div>
+          <div class="network-stat">
+            <strong>ماینرهای شناسایی شده:</strong> {{ total_miners }}
+          </div>
+          <div class="network-stat">
+            <strong>آخرین اسکن:</strong>
+            {% if recent_scans %} {{
+            recent_scans[0].start_time.strftime('%Y-%m-%d %H:%M') }} {% else %}
+            هیچ اسکنی انجام نشده {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions Panel -->
+  <div style="display: flex; gap: 8px; margin: 8px 0">
+    <div class="panel" style="flex: 1">
+      <div class="panel-header">
+        <i class="fas fa-bolt icon-16"></i> عملیات سریع
+      </div>
+      <div style="padding: 8px">
+        <div class="quick-actions">
+          <button class="action-button" onclick="window.location.href='/scan'">
+            <i class="fas fa-search icon-16"></i>
+            <span>شروع اسکن جدید</span>
+          </button>
+          <button class="action-button" onclick="startLiveMonitoring()">
+            <i class="fas fa-eye icon-16"></i>
+            <span>نظارت زنده</span>
+          </button>
+          <button
+            class="action-button"
+            onclick="window.location.href='/miners'"
+          >
+            <i class="fas fa-microchip icon-16"></i>
+            <span>مشاهده ماینرها</span>
+          </button>
+          <button
+            class="action-button"
+            onclick="window.location.href='/reports'"
+          >
+            <i class="fas fa-chart-bar icon-16"></i>
+            <span>گزارشات</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Status Panel -->
+    <div class="panel" style="flex: 1">
+      <div class="panel-header">
+        <i class="fas fa-server icon-16"></i> وضعیت سیستم
+      </div>
+      <div style="padding: 8px">
+        <div class="system-status">
+          <div class="status-item">
+            <span class="status-label">وضعیت سرویس:</span>
+            <span class="status-value online">��نلاین</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">پایگاه داده:</span>
+            <span class="status-value online">متصل</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">موتور تشخیص:</span>
+            <span class="status-value online">فعال</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">آخرین بروزرسانی:</span>
+            <span class="status-value" id="lastUpdate">در حال بارگیری...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .stat-panel {
+    background: #f0f0f0;
+    border: 1px inset #c0c0c0;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 150px;
+    flex: 1;
+  }
+
+  .stat-icon {
+    font-size: 24px;
+    width: 32px;
+    text-align: center;
+  }
+
+  .stat-info {
+    flex: 1;
+  }
+
+  .stat-number {
+    font-size: 18px;
+    font-weight: bold;
+    color: #000080;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: #606060;
+  }
+
+  .threat-grid {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .threat-item {
+    border: 1px inset #c0c0c0;
+    padding: 6px;
+    text-align: center;
+    min-width: 60px;
+    flex: 1;
+  }
+
+  .threat-critical {
+    background: #ffe0e0;
+    border-color: #ff0000;
+  }
+  .threat-high {
+    background: #fff0e0;
+    border-color: #ff8000;
+  }
+  .threat-medium {
+    background: #fffff0;
+    border-color: #ffff00;
+  }
+  .threat-low {
+    background: #e0ffe0;
+    border-color: #008000;
+  }
+
+  .threat-label {
+    font-size: 10px;
+    font-weight: bold;
+  }
+
+  .threat-count {
+    font-size: 16px;
+    font-weight: bold;
+    color: #000080;
+  }
+
+  .ascii-chart {
+    margin-top: 12px;
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+  }
+
+  .chart-title {
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+
+  .chart-bar {
+    margin: 2px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bar-label {
+    width: 60px;
+    font-size: 10px;
+  }
+
+  .bar-visual {
+    color: #000080;
+    min-width: 100px;
+  }
+
+  .bar-count {
+    font-weight: bold;
+    color: #800000;
+  }
+
+  .network-map {
+    background: #f8f8f8;
+    border: 1px inset #c0c0c0;
+    padding: 8px;
+  }
+
+  .map-legend {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+  }
+
+  .legend-color {
+    width: 12px;
+    height: 12px;
+    border: 1px solid #000;
+  }
+
+  .ascii-network-map {
+    background: #000;
+    color: #00ff00;
+    padding: 8px;
+    margin: 8px 0;
+    border: 1px inset #c0c0c0;
+  }
+
+  .network-stats {
+    display: flex;
+    gap: 16px;
+    font-size: 11px;
+    flex-wrap: wrap;
+  }
+
+  .network-stat {
+    margin: 2px 0;
+  }
+
+  .quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .action-button {
+    background: #c0c0c0;
+    border: 1px outset #c0c0c0;
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .action-button:hover {
+    border: 1px inset #c0c0c0;
+  }
+
+  .system-status {
+    font-size: 11px;
+  }
+
+  .status-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 4px 0;
+    padding: 2px 0;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .status-label {
+    font-weight: bold;
+  }
+
+  .status-value {
+    font-family: "Courier New", monospace;
+  }
+
+  .status-value.online {
+    color: #008000;
+    font-weight: bold;
+  }
+
+  @media (max-width: 768px) {
+    .stat-panel {
+      min-width: 100%;
+    }
+
+    .network-stats,
+    .map-legend {
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .quick-actions .action-button {
+      min-width: 100%;
+    }
+  }
+</style>
+
+<script>
+  // Update system metrics
+  function updateSystemMetrics() {
+    // دریافت آمار سیستم از API
+    fetch("/api/system_metrics")
+      .then((response) => response.json())
+      .then((data) => {
+        // به‌روزرسانی نمایش CPU و Memory
+        if (data.cpu_usage !== undefined) {
+          document.getElementById("cpu-usage").textContent =
+            Math.round(data.cpu_usage) + "%";
+        }
+        if (data.memory_usage !== undefined) {
+          document.getElementById("memory-usage").textContent =
+            Math.round(data.memory_usage) + "%";
+        }
+      })
+      .catch((error) => {
+        console.log("خطا در دریافت آمار سیستم:", error);
+        // استفاده از مقادیر شبیه‌سازی شده
+        updateSystemMetricsOffline();
+      });
+  }
+
+  function updateSystemMetricsOffline() {
+    // اعلام خطا در صورت عدم دسترسی به API
+    document.getElementById("cpu-usage").textContent = "خطا";
+    document.getElementById("memory-usage").textContent = "خطا";
+    console.error("خطا: عدم دسترسی به API آمار سیستم");
+  }
+
+  function updateDashboard() {
+    updateSystemMetrics();
+    updateLastUpdateTime();
+  }
+
+  function updateLastUpdateTime() {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString("fa-IR");
+    document.getElementById("lastUpdate").textContent = timeStr;
+  }
+
+  function startLiveMonitoring() {
+    // هدایت به صفحه مانیتورینگ زنده
+    window.location.href = "/scanner";
+  }
+
+  function refreshDashboard() {
+    location.reload();
+  }
+
+  // Initialize dashboard
+  document.addEventListener("DOMContentLoaded", function () {
+    updateDashboard();
+
+    // Update every 30 seconds
+    setInterval(updateDashboard, 30000);
+
+    // اطلاع‌رسانی آماده بودن سیستم
+    console.log("🟢 داشبورد سیستم تشخیص ماینر آماده است");
+  });
+</script>
+{% endblock %}

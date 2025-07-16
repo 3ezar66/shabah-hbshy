@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ورود به سیستم - سیستم شناسایی ماینر</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Vazir:wght@300;400;500;600;700&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Vazir", sans-serif;
+        background: #008080;
+        background-image:
+          radial-gradient(circle at 20% 20%, #004040 0%, transparent 50%),
+          radial-gradient(circle at 80% 80%, #004040 0%, transparent 50%),
+          radial-gradient(circle at 40% 40%, #006060 0%, transparent 50%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000000;
+      }
+
+      .login-window {
+        background: #c0c0c0;
+        border: 2px outset #c0c0c0;
+        width: 400px;
+        box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .login-header {
+        background: linear-gradient(to right, #0080ff, #004080);
+        color: white;
+        padding: 4px 8px;
+        font-weight: bold;
+        font-size: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .login-content {
+        padding: 20px;
+        background: #c0c0c0;
+      }
+
+      .login-title {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #000080;
+      }
+
+      .login-icon {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 48px;
+        color: #000080;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-label {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 4px;
+        border: 1px inset #c0c0c0;
+        background: white;
+        font-family: "Vazir", sans-serif;
+        font-size: 12px;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border: 1px inset #0080ff;
+      }
+
+      .button-group {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .btn-classic {
+        background: #c0c0c0;
+        border: 1px outset #c0c0c0;
+        padding: 6px 20px;
+        font-size: 12px;
+        cursor: pointer;
+        font-family: "Vazir", sans-serif;
+        font-weight: bold;
+      }
+
+      .btn-classic:hover {
+        border: 1px inset #c0c0c0;
+      }
+
+      .btn-classic:active {
+        border: 1px inset #c0c0c0;
+        background: #a0a0a0;
+      }
+
+      .btn-primary {
+        background: #0080ff;
+        color: white;
+      }
+
+      .system-info {
+        margin-top: 20px;
+        padding: 10px;
+        background: #f0f0f0;
+        border: 1px inset #c0c0c0;
+        font-size: 11px;
+        text-align: center;
+      }
+
+      .status-bar {
+        background: #c0c0c0;
+        border-top: 1px solid #808080;
+        padding: 4px 8px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+      }
+
+      .demo-credentials {
+        background: #fffacd;
+        border: 1px solid #daa520;
+        padding: 10px;
+        margin-top: 15px;
+        font-size: 11px;
+      }
+
+      .demo-credentials h6 {
+        margin-bottom: 5px;
+        color: #b8860b;
+      }
+
+      .loading-bar {
+        width: 100%;
+        height: 20px;
+        border: 1px inset #c0c0c0;
+        background: #f0f0f0;
+        margin: 10px 0;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .loading-progress {
+        height: 100%;
+        background: linear-gradient(to right, #0080ff, #004080);
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      .loading-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 11px;
+        font-weight: bold;
+        color: #000080;
+      }
+
+      .window-controls {
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      /* Animation for entry */
+      .login-window {
+        animation: slideIn 0.5s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: scale(0.8);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .error-message {
+        background: #ffe0e0;
+        border: 1px solid #ff0000;
+        padding: 8px;
+        margin-bottom: 15px;
+        font-size: 12px;
+        color: #ff0000;
+      }
+
+      .success-message {
+        background: #e0ffe0;
+        border: 1px solid #008000;
+        padding: 8px;
+        margin-bottom: 15px;
+        font-size: 12px;
+        color: #008000;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-window">
+      <div class="login-header">
+        <span>ورود به سیستم شناسایی ماینر</span>
+        <div class="window-controls">
+          <span onclick="minimizeWindow()">_</span>
+          <span onclick="closeWindow()" style="margin-right: 8px">×</span>
+        </div>
+      </div>
+
+      <div class="login-content">
+        <div class="login-icon">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+
+        <div class="login-title">سیستم شناسایی ماینرهای رمزارز</div>
+
+        {% if error_message %}
+        <div class="error-message">{{ error_message }}</div>
+        {% endif %} {% if success_message %}
+        <div class="success-message">{{ success_message }}</div>
+        {% endif %}
+
+        <form method="POST" action="/login" id="loginForm">
+          <div class="form-group">
+            <label for="username" class="form-label">نام کاربری:</label>
+            <input
+              type="text"
+              class="form-input"
+              id="username"
+              name="username"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">رمز عبور:</label>
+            <input
+              type="password"
+              class="form-input"
+              id="password"
+              name="password"
+              required
+            />
+          </div>
+
+          <div class="button-group">
+            <button type="submit" class="btn-classic btn-primary">ورود</button>
+            <button type="button" class="btn-classic" onclick="clearForm()">
+              پاک کردن
+            </button>
+            <button type="button" class="btn-classic" onclick="showDemo()">
+              نسخه نمایشی
+            </button>
+          </div>
+        </form>
+
+        <div class="demo-credentials" id="demoInfo" style="display: none">
+          <h6>اطلاعات نمایشی:</h6>
+          <strong>نام کاربری:</strong> admin<br />
+          <strong>رمز عبور:</strong> admin123
+        </div>
+
+        <div class="system-info">
+          <strong>سیستم امنیتی پیشرفته</strong><br />
+          طراحی و توسعه: عرفان رجبی (Erfan Rajabi)<br />
+          نسخه 1.0.0 - ۱۴۰۳
+        </div>
+
+        <div class="loading-bar" id="loadingBar" style="display: none">
+          <div class="loading-progress" id="loadingProgress"></div>
+          <div class="loading-text" id="loadingText">در حال ورود...</div>
+        </div>
+      </div>
+
+      <div class="status-bar">
+        <span>آماده برای ورود</span>
+        <span id="currentTime"></span>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script>
+      // Update time
+      function updateTime() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString("fa-IR");
+        document.getElementById("currentTime").textContent = timeStr;
+      }
+
+      // Window controls
+      function minimizeWindow() {
+        document.querySelector(".login-window").style.transform = "scale(0.1)";
+        setTimeout(() => {
+          document.querySelector(".login-window").style.transform = "scale(1)";
+        }, 1000);
+      }
+
+      function closeWindow() {
+        if (confirm("آیا می‌خواهید از برنامه خارج شوید؟")) {
+          window.history.back();
+        }
+      }
+
+      // Form functions
+      function clearForm() {
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
+      }
+
+      function showDemo() {
+        const demoInfo = document.getElementById("demoInfo");
+        if (demoInfo.style.display === "none") {
+          demoInfo.style.display = "block";
+          document.getElementById("username").value = "admin";
+          document.getElementById("password").value = "admin123";
+        } else {
+          demoInfo.style.display = "none";
+        }
+      }
+
+      // Form submission with loading
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", function (e) {
+          const loadingBar = document.getElementById("loadingBar");
+          const loadingProgress = document.getElementById("loadingProgress");
+          const loadingText = document.getElementById("loadingText");
+
+          loadingBar.style.display = "block";
+
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress += 10;
+            loadingProgress.style.width = progress + "%";
+
+            if (progress >= 100) {
+              clearInterval(interval);
+              loadingText.textContent = "ورود موفقیت‌آمیز - انتقال به سیستم...";
+
+              setTimeout(() => {
+                // Form will be submitted normally
+              }, 500);
+            }
+          }, 100);
+        });
+
+      // Auto-focus on username
+      window.onload = function () {
+        document.getElementById("username").focus();
+        updateTime();
+        setInterval(updateTime, 1000);
+      };
+
+      // Keyboard shortcuts
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          clearForm();
+        }
+        if (e.key === "F1") {
+          e.preventDefault();
+          showDemo();
+        }
+      });
+    </script>
+  </body>
+</html>
